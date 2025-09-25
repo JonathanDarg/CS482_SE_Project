@@ -2,4 +2,4 @@
 
 
 # User Stories Excel Sheet
-[CS482SE User Stories](https://studentsloyola-my.sharepoint.com/:x:/r/personal/jmdargakis_loyola_edu/Documents/CS482SE%20User%20Stories.xlsx?d=w2b868646c76d49139c01c96d0b908936&csf=1&web=1&e=TEP3JV)
+[CS482SE User Stories](https://studentsloyola-my.sharepoint.com/:x:/g/personal/jmdargakis_loyola_edu/EZRfg2NOI09Co295amk9Ft4BJfD0jLr3Ut-vtv34RVpQZg?e=X8z1fI&nav=MTVfezAwMDAwMDAwLTAwMDEtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMH0)
