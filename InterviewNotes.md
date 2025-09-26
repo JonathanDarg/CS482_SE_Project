@@ -13,7 +13,7 @@ Our client Mr. Ebert is asking us to create a baseball youth sports league websi
 
 ### Parents
 - Register themselves & connected to youth 
-- Put in youth info 7 accept invite
+- Put in youth info & accept invite
 - Responsibility disclaimer once registered child
 
 ### Team Managers
