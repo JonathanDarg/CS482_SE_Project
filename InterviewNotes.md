@@ -1,10 +1,10 @@
-####Youth Sports Leauge Website
+# Youth Sports Leauge Website
 
 
-####Users:
+# Users:
 
-##Admin
-##Parents
-##Team Managers
-##Youth
-##Guest
+### Admin
+### Parents
+### Team Managers
+### Youth
+### Guest
