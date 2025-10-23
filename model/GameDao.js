@@ -25,6 +25,20 @@ exports.readOneGame = async function(id){
     return game;
 }
 
+exports.getByMonth = async function(month, year){
+    let startDate = new Date(year, month - 1, 1);
+    let endDate = new Date(year, month, 1);
+
+    let games = await gameModel.find({
+        dateTime: {
+            $gte: startDate,
+            $lt: endDate
+        }
+    });
+    
+    return games;
+}
+
 exports.updateGame = async function(id, gameData){
     let game = await gameModel.findById(id);
     if(!game) return null;

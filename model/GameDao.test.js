@@ -127,3 +127,35 @@ test('readAll with data', async function(){
     let games =  await gameDao.getAllGames();
     expect(games.length).toBe(3);
 });
+
+test('get game by month', async function(){
+
+    let gameData1 = {
+        location: "Stuart's House",
+        dateTime: new Date('2024-07-01T15:00:00Z'),
+        rating: 5,
+        typeOfMatch: "Friendly"
+    };
+
+    let gameData2 = {
+        location: "Bob's House",
+        dateTime: new Date('2024-08-01T15:00:00Z'),
+        rating: 3,
+        typeOfMatch: "Competitive"
+    };
+
+    let gameData3 = {
+        location: "Alice's House",
+        dateTime: new Date('2024-09-01T15:00:00Z'),
+        rating: 4,
+        typeOfMatch: "Tournament"
+    };
+
+    await gameDao.createGame(gameData1);
+    await gameDao.createGame(gameData2);
+    await gameDao.createGame(gameData3);
+    
+    let games =  await gameDao.getByMonth(9, 2024);
+    expect(games.at(0).rating).toBe(4);
+});
+
