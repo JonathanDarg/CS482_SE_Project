@@ -19,7 +19,7 @@ function Calendar() {
 
   return (
     <div className="calendar-page">
-      <h1>Youth Baseball League</h1>
+      <h1>Baseball Game Calendar</h1>
       <div className="card">
         <p>
           Click on a date on the calendar to enter gameday information.
