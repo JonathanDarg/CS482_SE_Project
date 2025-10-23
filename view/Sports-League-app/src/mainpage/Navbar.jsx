@@ -8,23 +8,23 @@ const Navbar = () => {
     const handleClick = () => setClick(!click);
     
     const content = (
-        <div className="lg:hidden block absolute top-16 w-full left-0 bg-slate-900 transition z-40">
+        <div className="lg:hidden block absolute top-16 w-full left-0 bg-orange-500 transition z-40">
             <ul className="text-center text-xl p-20">
                 <Link spy={true} smooth={true} to="Home" onClick={handleClick}>
-                    <li className="my-4 py-4 border-b border-slate-800 hover:bg-slate-800 hover:rounded cursor-pointer">Home</li>
+                    <li className="my-4 py-4 border-b border-slate-800 hover:bg-orange-600 hover:rounded cursor-pointer">Home</li>
                 </Link> 
                 <Link spy={true} smooth={true} to="About" onClick={handleClick}>
-                    <li className="my-4 py-4 border-b border-slate-800 hover:bg-slate-800 hover:rounded cursor-pointer">About</li>
+                    <li className="my-4 py-4 border-b border-slate-800 hover:bg-orange-600 hover:rounded cursor-pointer">About</li>
                 </Link>
                 <Link spy={true} smooth={true} to="Contact" onClick={handleClick}>
-                    <li className="my-4 py-4 border-b border-slate-800 hover:bg-slate-800 hover:rounded cursor-pointer">Contact</li>
+                    <li className="my-4 py-4 border-b border-slate-800 hover:bg-orange-600 hover:rounded cursor-pointer">Contact</li>
                 </Link>
             </ul>
         </div>
     );
 
     return (
-        <nav className="sticky top-0 z-50 bg-slate-900">
+        <nav className="sticky top-0 z-50 bg-gradient-to-r from-orange-500 to-orange-800 py-2 px-3 rounded-md">
             <div className="h-10vh flex justify-between items-center text-white lg:py-5 px-20 py-4">
                 <div className="flex items-center flex-1">
                     <span className="text-3xl font-bold">Youth Sports League</span>
@@ -33,13 +33,13 @@ const Navbar = () => {
                     <div className="flex-10">
                         <ul className="flex gap-8 mr-16 text-[18px]">    
                             <Link spy={true} smooth={true} to="Home">
-                                <li className="hover:text-orange-300 transition border-b-2 border-slate-900 hover:text-orange-30000 cursor-pointer">Home</li>
+                                <li className="hover:text-orange-300 cursor-pointer">Home</li>
                             </Link>
                             <Link spy={true} smooth={true} to="About">
-                                <li className="hover:text-orange-300 transition border-b-2 border-slate-900 hover:text-orange-30000 cursor-pointer">About</li>
+                                <li className="hover:text-orange-300 cursor-pointer">About</li>
                             </Link>
                             <Link spy={true} smooth={true} to="Contact">
-                                <li className="hover:text-orange-300 transition border-b-2 border-slate-900 hover:text-orange-30000 cursor-pointer">Contact</li>
+                                <li className="hover:text-orange-300 cursor-pointer">Contact</li>
                             </Link>
                         </ul>
                     </div>
