@@ -1,0 +1,93 @@
+/* Define color variables */
+:root{
+  --accent: #ff6a00;       /* primary orange */
+  --accent-dark: #d85700;
+  --bg-soft: #fff7f0;
+}
+
+/* Page layout: center content horizontally, keep it at top vertically */
+.calendar-page {
+  min-height: 100vh;            /* fill viewport */
+  display: flex;
+  flex-direction: column;
+  align-items: center;      /* center header + calendar */
+  justify-content: flex-start;  /* place content at top */
+  padding: 1.5rem;
+  box-sizing: border-box;
+  text-align: center;       /* center text by default */
+  gap: 1rem;
+  background: linear-gradient(180deg, #ffffff 0%, var(--bg-soft) 100%);
+}
+
+/* Centered page title with orange palette */
+.calendar-page h1 {
+  margin: 0;
+  color: var(--accent-dark);
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Card styling */
+.card {
+  width: 100%;
+  max-width: 900px;
+  margin: 0;
+  background: #fff;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+  color: #333;
+  text-align: center;
+}
+
+/* calendar container sizing */
+.calendar {
+  width: 100%;
+  max-width: 900px;
+  margin-top: 0.75rem;
+}
+
+/* FullCalendar: toolbar title (month/year) in dark orange */
+.fc .fc-toolbar-title,
+.fc .fc-toolbar .fc-toolbar-title {
+  color: var(--accent-dark) !important;
+  font-weight: 700;
+}
+
+/* Toolbar buttons use orange accent */
+.fc .fc-button {
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent-dark);
+  border-radius: 6px;
+  padding: 6px 8px;
+}
+.fc .fc-button:hover,
+.fc .fc-button:focus {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent-dark);
+}
+
+/* Events use orange background */
+.fc .fc-daygrid-event {
+  background-color: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 6px;
+  font-size: 0.9rem;
+}
+
+/* Day numbers contrast */
+.fc .fc-daygrid-day-number {
+  color: #333 !important;
+}
+
+/* Small screen adjustments */
+@media (max-width: 640px) {
+  .calendar-page h1 { font-size: 1.4rem; }
+  .fc .fc-daygrid-event { font-size: 0.75rem; }
+  .calendar { padding: 0 8px; }
+}
