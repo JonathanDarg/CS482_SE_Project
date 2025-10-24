@@ -1,15 +1,26 @@
 const express = require('express');
+const cors = require('cors');
 require('dotenv').config();
-const db = require('./model/DbConnection');
 
+const db = require('./model/DbConnection'); 
 db.connect(); // Connect to MongoDB
 
+const gameController = require('./model/GameDao.js'); 
+
 const app = express();
+app.use(cors());
 app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.send('Server is running'); //test app
+// Routes
+app.get('/api/games', async (req, res) => {
+  const games = await gameController.getAllGames();
+  res.json(games);
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server Running on ${process.env.HOSTNAME}:${process.env.PORT}...`));
+app.post('/api/games', async (req, res) => {
+  const game = await gameController.createGame(req.body);
+  res.json(game);
+});
+
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
