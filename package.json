@@ -10,13 +10,18 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.15",
     "autoprefixer": "^10.4.21",
+    "concurrently": "^9.2.1",
     "jest": "^30.2.0",
+    "nodemon": "^3.1.10",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.15"
   },
   "scripts": {
     "test": "jest",
     "coverage": "jest --coverage",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "nodemon server.js",
+    "client": "npm run dev --prefix view/Sports-League-app"
   }
 }
