@@ -24,7 +24,7 @@ const Navbar = () => {
     );
 
     return (
-        <nav className="sticky top-0 z-50 bg-gradient-to-r from-orange-500 to-orange-800 py-2 px-3 rounded-md">
+        <nav className="sticky top-0 z-50 bg-gradient-to-r from-orange-500 to-orange-800 py-0 px-3 rounded-md">
             <div className="h-10vh flex justify-between items-center text-white lg:py-5 px-20 py-4">
                 <div className="flex items-center flex-1">
                     <span className="text-3xl font-bold">Youth Sports League</span>
