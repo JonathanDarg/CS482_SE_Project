@@ -2,6 +2,7 @@ import './App.css';
 import Navbar from './mainpage/Navbar';
 import Footer from './mainpage/Footer'; 
 import Calendar from './pages/Calendar';
+import Leaderboard from './pages/Leaderboard';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 function App() {
@@ -27,6 +28,8 @@ function App() {
 
           {/* Calendar Page */}
           <Route path="/Calendar" element={<Calendar />} />
+          {/* Scoreboard Page */}
+          <Route path="/Leaderboard" element={<Leaderboard />} />
         </Routes>
       </div>
 
