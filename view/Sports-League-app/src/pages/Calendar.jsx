@@ -229,18 +229,6 @@ function Calendar() {
                 />
               </label>
               <label>
-                Rating (1–10):
-                <input
-                  type="number"
-                  min="1"
-                  max="10"
-                  value={formData.rating}
-                  onChange={(e) =>
-                    setFormData({ ...formData, rating: e.target.value })
-                  }
-                />
-              </label>
-              <label>
                 Date and Time:
                 <input
                   type="datetime-local"

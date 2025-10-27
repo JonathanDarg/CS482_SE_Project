@@ -17,6 +17,9 @@ const Navbar = () => {
           <Link to="/Calendar" onClick={handleClick}>Calendar</Link>
         </li>
         <li className="my-4 py-4 border-b border-slate-800 hover:bg-orange-600 hover:rounded cursor-pointer">
+          <Link to="/Leaderboard" onClick={handleClick}>Leaderboard</Link>
+        </li>
+        <li className="my-4 py-4 border-b border-slate-800 hover:bg-orange-600 hover:rounded cursor-pointer">
           <Link to="/Contact" onClick={handleClick}>Contact</Link>
         </li>
         <li className="my-4 py-4 border-b border-slate-800 hover:bg-orange-600 hover:rounded cursor-pointer">
@@ -48,6 +51,9 @@ return (
             </li>
             <li className="hover:text-orange-300 cursor-pointer">
               <Link to="/Calendar">Calendar</Link>
+            </li>
+            <li className="hover:text-orange-300 cursor-pointer">
+              <Link to="/Leaderboard">Leaderboard</Link>
             </li>
             <li className="hover:text-orange-300 cursor-pointer">
               <Link to="/Contact">Contact</Link>
