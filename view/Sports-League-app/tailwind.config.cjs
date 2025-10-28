@@ -7,15 +7,9 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: "#889063",      // your main green color
-        secondary: "#fuchsia",   // for hover or accents
-        darkbg: "#1e293b",       // optional dark background
-      },
-      height: {
-        '10vh': '10vh',          // custom height for navbar
-      },
-      spacing: {
-        '20vh': '20vh',          // optional for larger padding if needed
+        primary: "#9a3412",    //dark orange      
+        secondary: "##ea580c", //light orange  
+        darkbg: "#1e293b",       
       },
     },
   },

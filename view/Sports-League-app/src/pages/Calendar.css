@@ -1,0 +1,214 @@
+/* ============================= */
+/* Define color variables        */
+/* ============================= */
+:root {
+  --accent: #ff6a00;       /* primary orange */
+  --accent-dark: #d85700;  /* darker orange for hover/contrast */
+  --bg-soft: #fff7f0;      /* soft background */
+}
+
+/* ============================= */
+/* Page layout                   */
+/* ============================= */
+.calendar-page {
+  min-height: 100vh;                 /* fill viewport */
+  display: flex;
+  flex-direction: column;
+  align-items: center;               /* center header + calendar */
+  justify-content: flex-start;       /* content starts at top */
+  padding: 1.5rem;
+  box-sizing: border-box;
+  text-align: center;
+  gap: 1rem;
+  background: linear-gradient(180deg, #ffffff 0%, var(--bg-soft) 100%);
+}
+
+/* Page title */
+.calendar-page h1 {
+  margin: 0;
+  color: var(--accent-dark);
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Card styling */
+.card {
+  width: 100%;
+  max-width: 900px;
+  margin: 0;
+  background: #fff;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+  color: #333;
+  text-align: center;
+}
+
+/* Calendar container */
+.calendar {
+  width: 100%;
+  max-width: 900px;
+  margin-top: 0.75rem;
+}
+
+/* ============================= */
+/* FullCalendar custom styles    */
+/* ============================= */
+
+/* Toolbar title (month/year) */
+.fc .fc-toolbar-title,
+.fc .fc-toolbar .fc-toolbar-title {
+  color: var(--accent-dark) !important;
+  font-weight: 700;
+}
+
+/* Toolbar buttons */
+.fc .fc-button {
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent-dark);
+  border-radius: 6px;
+  padding: 6px 8px;
+  transition: all 0.2s ease-in-out;
+}
+
+.fc .fc-button:hover,
+.fc .fc-button:focus {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent-dark);
+}
+
+/* Force Today button to orange (including primary variant) */
+.fc .fc-button.fc-today,
+.fc .fc-button.fc-today.fc-button-primary {
+  background-color: var(--accent) !important;
+  color: #fff !important;
+  border-color: var(--accent-dark) !important;
+}
+
+.fc .fc-button.fc-today:hover,
+.fc .fc-button.fc-today:focus,
+.fc .fc-button.fc-today.fc-button-primary:hover,
+.fc .fc-button.fc-today.fc-button-primary:focus {
+  background-color: var(--accent-dark) !important;
+  color: #fff !important;
+  border-color: var(--accent-dark) !important;
+}
+
+/* Calendar events */
+.fc .fc-daygrid-event {
+  background-color: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 6px;
+  font-size: 0.9rem;
+}
+
+/* Force event dot to black */
+.fc-daygrid-event-dot,
+.fc-event-dot {
+  background-color: #000 !important;
+  border-color: #000 !important;
+}
+
+/* Day numbers contrast */
+.fc .fc-daygrid-day-number {
+  color: #333 !important;
+}
+
+
+/* Modal overlay and content     */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  padding: 20px 30px;
+  border-radius: 12px;
+  width: 320px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.modal h2 {
+  margin-bottom: 15px;
+}
+
+.modal label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.modal input {
+  width: 100%;
+  padding: 6px;
+  margin-top: 4px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+
+/* Modal buttons                 */
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+
+/* General buttons (Add/Save) */
+.modal-buttons button {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background-color: var(--accent);       /* main orange */
+  color: #fff;
+  transition: background-color 0.2s ease-in-out;
+}
+.modal-buttons button:hover {
+  background-color: var(--accent-dark);  /* dark orange on hover */
+}
+
+/* Delete button */
+.modal-buttons .delete {
+  background-color: #e74c3c;             /* red */
+}
+.modal-buttons .delete:hover {
+  background-color: #f98a79;             /* light red */
+}
+
+/* Cancel button (lighter orange) */
+.modal-buttons .cancel {
+  background-color: #ffb366;             /* light orange */
+}
+.modal-buttons .cancel:hover {
+  background-color: var(--accent);       /* main orange on hover */
+}
+
+/* Responsive adjustments        */
+@media (max-width: 640px) {
+  .calendar-page h1 {
+    font-size: 1.4rem;
+  }
+
+  .fc .fc-daygrid-event {
+    font-size: 0.75rem;
+  }
+
+  .calendar {
+    padding: 0 8px;
+  }
+}

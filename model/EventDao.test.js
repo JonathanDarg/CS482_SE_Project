@@ -1,71 +1,71 @@
 const dbcon = require('./DbConnection');
-const gameDao = require('./GameDao');
+const EventDao = require('./EventDao');
 
 beforeAll(function(){
     dbcon.connect('test');
 });
 
 afterAll(async function(){
-    await gameDao.deleteAll();
+    await EventDao.deleteAll();
     await dbcon.disconnect();
 });
 
 beforeEach(async function(){
-    await gameDao.deleteAll();
+    await EventDao.deleteAll();
 });
 
-test('read all games from empty DB', async function(){
+test('read all Events from empty DB', async function(){
 
-    let games =  await gameDao.getAllGames();
-    expect(games.length).toBe(0);
+    let Events =  await EventDao.getAllEvents();
+    expect(Events.length).toBe(0);
 
 });
 
-test('create one simple game', async function(){
+test('create one simple Event', async function(){
 
-    let gameData = {
+    let EventData = {
         location: "Stuart's House",
         dateTime: new Date('2024-07-01T15:00:00Z'),
         rating: 5,
         typeOfMatch: "Friendly"
     };
 
-    let game = await gameDao.createGame(gameData);
+    let Event = await EventDao.createEvent(EventData);
 
-    expect(game._id).toBeDefined();
-    expect(game.rating).toBe(5);
+    expect(Event._id).toBeDefined();
+    expect(Event.rating).toBe(5);
 });
 
-test('create one game better test', async function(){
+test('create one Event better test', async function(){
 
-    let gameData = {
+    let EventData = {
         location: "Stuart's House",
         dateTime: new Date('2024-07-01T15:00:00Z'),
         rating: 5,
         typeOfMatch: "Friendly"
     };
 
-    let game = await gameDao.createGame(gameData);
-    let found = await gameDao.readOneGame(game._id);
+    let Event = await EventDao.createEvent(EventData);
+    let found = await EventDao.readOneEvent(Event._id);
 
-    expect(game._id).toBeDefined();
-    expect(game.rating).toBe(5);
+    expect(Event._id).toBeDefined();
+    expect(Event.rating).toBe(5);
 
-    expect(game._id).toEqual(found._id);
-    expect(game.date).toEqual(found.date);
+    expect(Event._id).toEqual(found._id);
+    expect(Event.date).toEqual(found.date);
 
 });
 
-test('update one game', async function(){
+test('update one Event', async function(){
     
-    let gameData = {
+    let EventData = {
         location: "Stuart's House",
         dateTime: new Date('2024-07-01T15:00:00Z'),
         rating: 5,
         typeOfMatch: "Friendly"
     };
 
-    let game = await gameDao.createGame(gameData);
+    let Event = await EventDao.createEvent(EventData);
 
     let updatedData = {
         location: "Bob's House",
@@ -74,88 +74,88 @@ test('update one game', async function(){
         typeOfMatch: "Competitive"
     };
 
-    let updatedGame = await gameDao.updateGame(game._id, updatedData);
-    expect(updatedGame.location).toBe("Bob's House");
-    expect(updatedGame.rating).toBe(3);
+    let updatedEvent = await EventDao.updateEvent(Event._id, updatedData);
+    expect(updatedEvent.location).toBe("Bob's House");
+    expect(updatedEvent.rating).toBe(3);
 });
 
-test('create and delete one game', async function(){
+test('create and delete one Event', async function(){
     
-    let gameData = {
+    let EventData = {
         location: "Stuart's House",
         dateTime: new Date('2024-07-01T15:00:00Z'),
         rating: 5,
         typeOfMatch: "Friendly"
     };
 
-    let game = await gameDao.createGame(gameData);
-    let found = await gameDao.readOneGame(game._id);
+    let Event = await EventDao.createEvent(EventData);
+    let found = await EventDao.readOneEvent(Event._id);
     expect(found).not.toBeNull();
 
-    await gameDao.deleteGame(game._id);
-    let deleted = await gameDao.readOneGame(game._id);
+    await EventDao.deleteEvent(Event._id);
+    let deleted = await EventDao.readOneEvent(Event._id);
     expect(deleted).toBeNull();
 });
 
 test('readAll with data', async function(){
 
-    let gameData1 = {
+    let EventData1 = {
         location: "Stuart's House",
         dateTime: new Date('2024-07-01T15:00:00Z'),
         rating: 5,
         typeOfMatch: "Friendly"
     };
 
-    let gameData2 = {
+    let EventData2 = {
         location: "Bob's House",
         dateTime: new Date('2024-08-01T15:00:00Z'),
         rating: 3,
         typeOfMatch: "Competitive"
     };
 
-    let gameData3 = {
+    let EventData3 = {
         location: "Alice's House",
         dateTime: new Date('2024-09-01T15:00:00Z'),
         rating: 4,
         typeOfMatch: "Tournament"
     };
 
-    await gameDao.createGame(gameData1);
-    await gameDao.createGame(gameData2);
-    await gameDao.createGame(gameData3);
+    await EventDao.createEvent(EventData1);
+    await EventDao.createEvent(EventData2);
+    await EventDao.createEvent(EventData3);
     
-    let games =  await gameDao.getAllGames();
-    expect(games.length).toBe(3);
+    let Events =  await EventDao.getAllEvents();
+    expect(Events.length).toBe(3);
 });
 
-test('get game by month', async function(){
+test('get Event by month', async function(){
 
-    let gameData1 = {
+    let EventData1 = {
         location: "Stuart's House",
         dateTime: new Date('2024-07-01T15:00:00Z'),
         rating: 5,
         typeOfMatch: "Friendly"
     };
 
-    let gameData2 = {
+    let EventData2 = {
         location: "Bob's House",
         dateTime: new Date('2024-08-01T15:00:00Z'),
         rating: 3,
         typeOfMatch: "Competitive"
     };
 
-    let gameData3 = {
+    let EventData3 = {
         location: "Alice's House",
         dateTime: new Date('2024-09-01T15:00:00Z'),
         rating: 4,
         typeOfMatch: "Tournament"
     };
 
-    await gameDao.createGame(gameData1);
-    await gameDao.createGame(gameData2);
-    await gameDao.createGame(gameData3);
+    await EventDao.createEvent(EventData1);
+    await EventDao.createEvent(EventData2);
+    await EventDao.createEvent(EventData3);
     
-    let games =  await gameDao.getByMonth(9, 2024);
-    expect(games.at(0).rating).toBe(4);
+    let Events =  await EventDao.getByMonth(9, 2024);
+    expect(Events.at(0).rating).toBe(4);
 });
 
