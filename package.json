@@ -5,7 +5,8 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "mongodb": "^6.20.0",
-    "mongoose": "^8.19.1"
+    "mongoose": "^8.19.1",
+    "multer": "^2.0.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.15",
