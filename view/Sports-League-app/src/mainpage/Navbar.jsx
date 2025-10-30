@@ -1,29 +1,38 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FaTimes } from 'react-icons/fa';
+import { FaTimes, FaHome, FaCalendarAlt, FaTrophy, FaEnvelope, FaUser } from 'react-icons/fa';
 import { CiMenuFries } from 'react-icons/ci';      
 
 const Navbar = () => {
-    const [click, setClick] = useState(false);
-    const handleClick = () => setClick(!click);
+  const [click, setClick] = useState(false);
+  const handleClick = () => setClick(!click);
     
-    const content = (
+  const content = (
     <div className="lg:hidden block absolute top-16 w-full left-0 bg-orange-500 transition z-40">
       <ul className="text-center text-xl p-20">
         <li className="my-4 py-4 border-b border-slate-800 hover:bg-orange-600 hover:rounded cursor-pointer">
-          <Link to="/" onClick={handleClick}>Home</Link>
+          <Link to="/" onClick={handleClick} className="flex items-center justify-center gap-2">
+            <FaHome /> Home
+          </Link>
         </li>
         <li className="my-4 py-4 border-b border-slate-800 hover:bg-orange-600 hover:rounded cursor-pointer">
-          <Link to="/Calendar" onClick={handleClick}>Calendar</Link>
+          <Link to="/Calendar" onClick={handleClick} className="flex items-center justify-center gap-2">
+            <FaCalendarAlt /> Calendar
+          </Link>
         </li>
         <li className="my-4 py-4 border-b border-slate-800 hover:bg-orange-600 hover:rounded cursor-pointer">
-          <Link to="/Leaderboard" onClick={handleClick}>Leaderboard</Link>
+          <Link to="/Leaderboard" onClick={handleClick} className="flex items-center justify-center gap-2">
+            <FaTrophy /> Leaderboard
+          </Link>
         </li>
         <li className="my-4 py-4 border-b border-slate-800 hover:bg-orange-600 hover:rounded cursor-pointer">
-          <Link to="/Contact" onClick={handleClick}>Contact</Link>
+          <Link to="/Contact" onClick={handleClick} className="flex items-center justify-center gap-2">
+            <FaEnvelope /> Contact
+          </Link>
         </li>
         <li className="my-4 py-4 border-b border-slate-800 hover:bg-orange-600 hover:rounded cursor-pointer">
-          <Link to="/Login" onClick={handleClick}>
+          <Link to="/Login" onClick={handleClick} className="flex items-center justify-center gap-2">
+            <FaUser />
             <button className="bg-white text-orange-700 px-6 py-2 rounded-md font-semibold hover:bg-orange-200 transition">
               Login
             </button>
@@ -33,11 +42,17 @@ const Navbar = () => {
     </div>
   );
 
-return (
-    <nav className="sticky top-0 z-50 w-full bg-linear-to-r from-orange-500 to-orange-800 py-0 px-3">
+  return (
+    <nav className="sticky top-0 z-50 w-full bg-gradient-to-r from-orange-500 to-orange-800 py-0 px-3 shadow-md">
       <div className="h-10vh flex justify-between items-center text-white lg:py-5 px-20 py-4">
-        {/* Brand */}
-        <div className="flex items-center flex-1">
+        
+        {/* logo */}
+        <div className="flex items-center flex-1 gap-3">
+          <img
+            src="/images/logo1.png"
+            alt="Logo"
+            className="w-12 h-12 object-contain rounded-full"
+          />
           <Link to="/" className="text-3xl font-bold hover:text-orange-300 transition">
             Youth Sports League
           </Link>
@@ -46,21 +61,26 @@ return (
         {/* Desktop Links */}
         <div className="lg:flex md:flex lg:flex-1 items-center justify-end font-normal hidden">
           <ul className="flex gap-8 mr-16 text-[18px]">    
-            <li className="hover:text-orange-300 cursor-pointer">
+            <li className="hover:text-orange-300 cursor-pointer flex items-center gap-2">
+              <FaHome />
               <Link to="/">Home</Link>
             </li>
-            <li className="hover:text-orange-300 cursor-pointer">
+            <li className="hover:text-orange-300 cursor-pointer flex items-center gap-2">
+              <FaCalendarAlt />
               <Link to="/Calendar">Calendar</Link>
             </li>
-            <li className="hover:text-orange-300 cursor-pointer">
+            <li className="hover:text-orange-300 cursor-pointer flex items-center gap-2">
+              <FaTrophy />
               <Link to="/Leaderboard">Leaderboard</Link>
             </li>
-            <li className="hover:text-orange-300 cursor-pointer">
+            <li className="hover:text-orange-300 cursor-pointer flex items-center gap-2">
+              <FaEnvelope />
               <Link to="/Contact">Contact</Link>
             </li>
           </ul>
 
-          <Link to="/Login">
+          <Link to="/Login" className="flex items-center gap-2">
+            <FaUser />
             <button className="bg-white text-orange-700 px-5 py-2 rounded-md font-semibold hover:bg-orange-200 transition">
               Login
             </button>
