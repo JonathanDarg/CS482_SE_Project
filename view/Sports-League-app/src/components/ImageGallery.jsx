@@ -11,9 +11,8 @@ function ImageGallery() {
         const recent = data.slice(0, 3); // newest 3
         const imageBlobs = await Promise.all(
           recent.map(async (img) => {
-            const blob = await fetch(
-              `http://localhost:4000/api/images/latest?imgId=${img._id}`
-            ).then(r => r.blob());
+            const blob = await fetch(`http://localhost:4000/api/images/${img._id}`)
+              .then(r => r.blob());
             return URL.createObjectURL(blob);
           })
         );
@@ -37,9 +36,8 @@ function ImageGallery() {
 
     if (res.ok) {
       const newImage = await res.json();
-      const blob = await fetch(
-        `http://localhost:4000/api/images/latest?imgId=${newImage.image._id}`
-      ).then(r => r.blob());
+      const blob = await fetch(`http://localhost:4000/api/images/${newImage.image._id}`)
+        .then(r => r.blob());
 
       setPreviewURLs(prev => [URL.createObjectURL(blob), ...prev].slice(0, 3));
       alert("✅ Image uploaded successfully!");

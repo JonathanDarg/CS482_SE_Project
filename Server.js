@@ -23,7 +23,7 @@ app.delete("/api/events/:id", eventController.deleteEvent);
 // Image routes
 app.post("/api/images/upload", imageController.uploadImage);
 app.get("/api/images", imageController.getImages);
-app.get("/api/images/latest", imageController.getImageById);
+app.get("/api/images/:id", imageController.getImageById);
 app.delete("/api/images/:id", imageController.deleteImage);
 
 const PORT = process.env.PORT || 4000;
