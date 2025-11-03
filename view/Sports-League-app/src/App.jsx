@@ -1,8 +1,7 @@
-// App.jsx
 import "./App.css";
 import Navbar from "./mainpage/Navbar";
 import Footer from "./mainpage/Footer";
-import { Hero } from "./components/Hero"; 
+import { Hero } from "./components/Hero";
 import Calendar from "./pages/Calendar";
 import Leaderboard from "./pages/Leaderboard";
 import HomeCalendar from "./pages/HomeCalendar";
@@ -20,11 +19,16 @@ function App() {
             path="/"
             element={
               <div className="grow">
-                <Hero /> 
+                <Hero />
                 <h2 className="text-center text-4xl font-bold text-orange-500 mb-4">
                   Youth Sports League
                 </h2>
-                <HomeCalendar />
+
+                {/* Calendar and Gallery */}
+                <div className="flex gap-2 p-4 items-start justify-center">
+                  <HomeCalendar />
+                  <ImageGallery />
+                </div>
               </div>
             }
           />
