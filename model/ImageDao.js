@@ -6,12 +6,13 @@ const ImageSchema = new mongoose.Schema({
     data: Buffer,
     contentType: String,
   },
+  is_minor: { type: Boolean, default: false }, 
 });
 
 const ImageModel = mongoose.model("Image", ImageSchema);
 
 // Create and save a new image
-exports.createImage = async (name, fileBuffer, mimeType) => {
+exports.createImage = async (name, fileBuffer, mimeType, is_minor = false) => {
   try {
     const newImage = new ImageModel({
       name,
@@ -19,6 +20,7 @@ exports.createImage = async (name, fileBuffer, mimeType) => {
         data: fileBuffer,
         contentType: mimeType,
       },
+      is_minor,
     });
     const savedImage = await newImage.save();
     return savedImage;
