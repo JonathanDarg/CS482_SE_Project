@@ -1,117 +1,299 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { FaTimes } from "react-icons/fa";
 
 function ImageGallery() {
   const [previewURLs, setPreviewURLs] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [fade, setFade] = useState(true);
+  const [isSignedIn, setIsSignedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [showUploadForm, setShowUploadForm] = useState(false);
+  const [uploadFile, setUploadFile] = useState(null);
+  const [isMinor, setIsMinor] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
-  // Fetch all images
-  useEffect(() => {
-    fetch("http://localhost:4000/api/images")
-      .then((res) => res.json())
-      .then(async (data) => {
-        const imageBlobs = await Promise.all(
-          data.map(async (img) => {
-            const blob = await fetch(`http://localhost:4000/api/images/${img._id}`).then((r) =>
-              r.blob()
-            );
-            return { id: img._id, url: URL.createObjectURL(blob) };
-          })
-        );
-        setPreviewURLs(imageBlobs);
-      })
-      .catch((err) => console.error("Error fetching images:", err));
+  const intervalRef = useRef(null);
+  const fetchedOnce = useRef(false);
+
+  // Fetch images once
+  const fetchImages = useCallback(async () => {
+    if (fetchedOnce.current) return;
+    fetchedOnce.current = true;
+
+    try {
+      const res = await fetch("http://localhost:4000/api/images");
+      if (!res.ok) throw new Error("Failed to fetch images");
+
+      const data = await res.json();
+
+      previewURLs.forEach((img) => URL.revokeObjectURL(img.url));
+
+      const imageBlobs = await Promise.all(
+        data.map(async (img) => {
+          const blobRes = await fetch(`http://localhost:4000/api/images/${img._id}`);
+          const blob = await blobRes.blob();
+          return {
+            id: img._id,
+            url: URL.createObjectURL(blob),
+            is_minor: img.is_minor || false,
+          };
+        })
+      );
+
+      setPreviewURLs(imageBlobs);
+    } catch (err) {
+      console.error("Error fetching images:", err);
+    }
   }, []);
 
-  // Rotate images
   useEffect(() => {
-    if (previewURLs.length === 0) return;
+    fetchImages();
+    return () => {
+      previewURLs.forEach((img) => URL.revokeObjectURL(img.url));
+    };
+  }, [fetchImages, previewURLs]);
 
-    const interval = setInterval(() => {
+  // Show all images if signed in or admin; otherwise hide minors
+  const visibleImages =
+    isSignedIn || isAdmin
+      ? previewURLs
+      : previewURLs.filter((img) => !img.is_minor);
+
+  // Reset index when mode or images change
+  useEffect(() => {
+    setCurrentIndex(0);
+  }, [isSignedIn, isAdmin, visibleImages.length]);
+
+  // Slideshow rotation
+  useEffect(() => {
+    if (visibleImages.length <= 1) return;
+    clearInterval(intervalRef.current);
+    intervalRef.current = setInterval(() => {
       setFade(false);
       setTimeout(() => {
-        setCurrentIndex((prev) => (prev + 1) % previewURLs.length);
+        setCurrentIndex((prev) => (prev + 1) % visibleImages.length);
         setFade(true);
       }, 500);
     }, 10000);
 
-    return () => clearInterval(interval);
-  }, [previewURLs]);
+    return () => clearInterval(intervalRef.current);
+  }, [visibleImages]);
 
   // Upload image
   const handleUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+    e.preventDefault();
+    if (!uploadFile) return alert("❌ Please select a file to upload.");
+
+    setIsUploading(true);
     const formData = new FormData();
-    formData.append("image", file);
-    const res = await fetch("http://localhost:4000/api/images/upload", { method: "POST", body: formData });
-    if (res.ok) {
+    formData.append("image", uploadFile);
+    formData.append("is_minor", isMinor ? "true" : "false");
+
+    try {
+      const res = await fetch("http://localhost:4000/api/images/upload", {
+        method: "POST",
+        body: formData,
+      });
+      if (!res.ok) throw new Error("Upload failed");
+
       const newImage = await res.json();
-      const blob = await fetch(`http://localhost:4000/api/images/${newImage.image._id}`).then(r => r.blob());
-      setPreviewURLs(prev => [...prev, { id: newImage.image._id, url: URL.createObjectURL(blob) }]);
+      const blobRes = await fetch(`http://localhost:4000/api/images/${newImage.image._id}`);
+      const blob = await blobRes.blob();
+      const objectUrl = URL.createObjectURL(blob);
+
+      setPreviewURLs((prev) => [
+        ...prev,
+        { id: newImage.image._id, url: objectUrl, is_minor: newImage.image.is_minor },
+      ]);
+      setUploadFile(null);
+      setIsMinor(false);
+      setShowUploadForm(false);
       alert("✅ Image uploaded successfully!");
-    } else alert("❌ Failed to upload image.");
+    } catch (err) {
+      console.error("Upload error:", err);
+      alert("❌ Failed to upload image.");
+    } finally {
+      setIsUploading(false);
+    }
   };
 
-  // Remove image
+  // Remove image (Admin only)
   const handleRemove = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this image?")) return;
     try {
-      await fetch(`http://localhost:4000/api/images/${id}`, { method: "DELETE" });
-      setPreviewURLs(prev => prev.filter(img => img.id !== id));
-      alert("🗑️ Image removed successfully!");
+      const res = await fetch(`http://localhost:4000/api/images/${id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Delete failed");
+
+      setPreviewURLs((prev) => {
+        const removed = prev.find((img) => img.id === id);
+        if (removed) URL.revokeObjectURL(removed.url);
+        return prev.filter((img) => img.id !== id);
+      });
     } catch (err) {
-      console.error(err);
+      console.error("Delete error:", err);
       alert("❌ Failed to delete image.");
     }
   };
 
-  if (previewURLs.length === 0) {
+  // Top/bottom image 
+  const topImages = [
+    visibleImages[currentIndex % visibleImages.length],
+    visibleImages[(currentIndex + 1) % visibleImages.length],
+  ];
+  const bottomImage =
+    visibleImages[(currentIndex + 2) % visibleImages.length] || null;
+
+  // Guest / Signed In / Admin toggle
+  const ActionButtons = () => {
+    const mode = isAdmin ? "Admin" : isSignedIn ? "Signed In" : "Guest";
+
+    const handleModeToggle = () => {
+      if (!isSignedIn && !isAdmin) {
+        // Guest → Signed In
+        setIsSignedIn(true);
+        setIsAdmin(false);
+      } else if (isSignedIn && !isAdmin) {
+        // Signed In → Admin
+        setIsSignedIn(false);
+        setIsAdmin(true);
+      } else {
+        // Admin → Guest
+        setIsSignedIn(false);
+        setIsAdmin(false);
+      }
+    };
+
     return (
-      <div className="bg-white shadow-lg rounded-2xl p-4 flex flex-col items-center justify-center max-w-[400px] h-auto">
+      <div className="flex justify-between w-full mt-3 p-2">
+        <button
+          onClick={handleModeToggle}
+          className="bg-gray-400 hover:bg-gray-500 text-white text-sm px-3 py-2 rounded-lg transition-colors"
+        >
+          {mode === "Guest"
+            ? "View as Signed In"
+            : mode === "Signed In"
+            ? "View as Admin"
+            : "View as Guest"}
+        </button>
+
+        {(isSignedIn || isAdmin) && (
+          <button
+            onClick={() => setShowUploadForm(true)}
+            className="bg-orange-500 hover:bg-orange-600 text-white text-sm px-3 py-2 rounded-lg transition-colors"
+          >
+            Upload
+          </button>
+        )}
+      </div>
+    );
+  };
+
+  // Upload modal
+  const UploadModal = () => (
+    <div className="fixed inset-0 bg-gray-300/60 flex items-center justify-center z-50">
+      <div className="bg-gray-100/80 p-6 rounded-lg shadow-lg backdrop-blur-md flex flex-col items-center max-w-sm w-full mx-4">
+        <h2 className="text-lg font-semibold mb-4">Upload Image</h2>
+        <form onSubmit={handleUpload} className="flex flex-col items-center space-y-4 w-full">
+          <label className="w-48 h-32 border-2 border-dashed border-gray-400 rounded-lg flex flex-col items-center justify-center text-gray-600 cursor-pointer hover:border-gray-500 transition-colors">
+            {uploadFile ? (
+              <span className="text-sm">{uploadFile.name}</span>
+            ) : (
+              <span className="text-sm">Click to Upload</span>
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => setUploadFile(e.target.files[0])}
+            />
+          </label>
+
+          <label className="flex items-center space-x-2 text-gray-700">
+            <input
+              type="checkbox"
+              checked={isMinor}
+              onChange={(e) => setIsMinor(e.target.checked)}
+            />
+            <span>Does this Image contain a Minor?</span>
+          </label>
+
+          <div className="flex space-x-3">
+            <button
+              type="submit"
+              disabled={isUploading}
+              className="bg-green-500 hover:bg-green-600 disabled:bg-green-300 text-white px-4 py-2 rounded-lg transition-colors"
+            >
+              {isUploading ? "Uploading..." : "Upload"}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setShowUploadForm(false);
+                setUploadFile(null);
+                setIsMinor(false);
+              }}
+              disabled={isUploading}
+              className="bg-red-500 hover:bg-red-600 disabled:bg-red-300 text-white px-4 py-2 rounded-lg transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+
+  // Empty gallery state
+  if (visibleImages.length === 0) {
+    return (
+      <div className="bg-white shadow-lg rounded-2xl p-4 flex flex-col items-center justify-center max-w-[400px] min-h-[300px]">
         <div className="text-gray-400 text-center py-8 border border-dashed border-gray-300 rounded-lg w-full">
-          No images yet
+          No images available
         </div>
-        <label className="mt-4 bg-orange-500 hover:bg-orange-600 text-white text-sm px-3 py-2 rounded-lg cursor-pointer">
-          Upload Image
-          <input type="file" accept="image/*" className="hidden" onChange={handleUpload} />
-        </label>
+        <ActionButtons />
+        {showUploadForm && <UploadModal />}
       </div>
     );
   }
 
-  const topImages = [
-    previewURLs[currentIndex % previewURLs.length],
-    previewURLs[(currentIndex + 1) % previewURLs.length],
-  ];
-  const bottomImage = previewURLs[(currentIndex + 2) % previewURLs.length];
-
+  // Main gallery view
   return (
-    <div className="bg-white shadow-lg rounded-2xl p-4 flex flex-col max-w-[400px] h-auto">
-      <div className="flex flex-col gap-2">
-        {/* Top two images */}
-        <div className="grid grid-cols-2 gap-2">
-          {topImages.map((img, index) => (
-            <div key={img.id} className="relative w-full h-40 overflow-hidden rounded-lg">
-              <img
-                src={img.url}
-                alt={`Gallery top ${index + 1}`}
-                className={`w-full h-full object-cover transition-opacity duration-500 ${
-                  fade ? "opacity-100" : "opacity-0"
-                }`}
-              />
-              <button
-                onClick={() => handleRemove(img.id)}
-                className="absolute top-1 right-1 bg-black/60 hover:bg-red-600 text-white p-1 rounded-full"
-                title="Remove image"
-              >
-                <FaTimes />
-              </button>
-            </div>
-          ))}
-        </div>
+    <div className="bg-white shadow-lg rounded-2xl p-4 flex flex-col max-w-[400px]">
+      <ActionButtons />
 
-        {/* Bottom large image */}
+      {/* Top two images */}
+      <div className="grid grid-cols-2 gap-2 mb-2">
+        {topImages.map(
+          (img, index) =>
+            img && (
+              <div
+                key={`${img.id}-${index}`}
+                className="relative w-full h-40 overflow-hidden rounded-lg"
+              >
+                <img
+                  src={img.url}
+                  alt={`Gallery ${index}`}
+                  className={`w-full h-full object-cover transition-opacity duration-500 ${
+                    fade ? "opacity-100" : "opacity-0"
+                  }`}
+                />
+                {isAdmin && (
+                  <button
+                    onClick={() => handleRemove(img.id)}
+                    className="absolute top-1 right-1 bg-black/50 hover:bg-red-600 text-white p-1 rounded-full transition-colors"
+                  >
+                    <FaTimes size={12} />
+                  </button>
+                )}
+              </div>
+            )
+        )}
+      </div>
+
+      {/* Bottom image */}
+      {bottomImage && (
         <div className="relative w-full h-56 overflow-hidden rounded-lg">
           <img
             src={bottomImage.url}
@@ -120,20 +302,18 @@ function ImageGallery() {
               fade ? "opacity-100" : "opacity-0"
             }`}
           />
-          <button
-            onClick={() => handleRemove(bottomImage.id)}
-            className="absolute top-2 right-2 bg-black/60 hover:bg-red-600 text-white p-1 rounded-full"
-            title="Remove image"
-          >
-            <FaTimes />
-          </button>
+          {isAdmin && (
+            <button
+              onClick={() => handleRemove(bottomImage.id)}
+              className="absolute top-2 right-2 bg-black/50 hover:bg-red-600 text-white p-1 rounded-full transition-colors"
+            >
+              <FaTimes size={14} />
+            </button>
+          )}
         </div>
-      </div>
+      )}
 
-      <label className="mt-4 bg-orange-500 hover:bg-orange-600 text-white text-sm px-3 py-2 rounded-lg cursor-pointer self-center">
-        Upload Image
-        <input type="file" accept="image/*" className="hidden" onChange={handleUpload} />
-      </label>
+      {showUploadForm && <UploadModal />}
     </div>
   );
 }
