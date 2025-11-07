@@ -6,6 +6,8 @@ import Calendar from "./pages/Calendar";
 import Leaderboard from "./pages/Leaderboard";
 import HomeCalendar from "./pages/HomeCalendar";
 import ImageGallery from "./components/ImageGallery";
+import Score from "./components/Score";
+import Live from "./pages/Live";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 function App() {
@@ -35,6 +37,9 @@ function App() {
           <Route path="/Calendar" element={<Calendar />} />
           <Route path="/Leaderboard" element={<Leaderboard />} />
           <Route path="/Gallery" element={<ImageGallery />} />
+
+          <Route path="/Score" element={<Score />} />
+          <Route path="/Live" element={<Live />} />
         </Routes>
       </div>
 

@@ -2,115 +2,124 @@ import React, { useState } from "react";
 
 function Score() {
   const [homeTeam, setHomeTeam] = useState({
-    name: "Home",
-    runs: 3,
-    hits: 5,
-    errors: 1,
-    innings: [1, 0, 2, 0, 0, 0, 0, 0, 0],
+    name: "Lions",
+    record: "4-3",
+    score: 5,
+    logo:  "/images/lion.jpg",
   });
 
   const [awayTeam, setAwayTeam] = useState({
-    name: "Away",
-    runs: 4,
-    hits: 6,
-    errors: 0,
-    innings: [0, 1, 0, 2, 0, 0, 1, 0, 0],
+    name: "Tigers",
+    record: "3-4",
+    score: 4,
+    logo: "/images/tiger.jpg",
   });
 
-  const [editing, setEditing] = useState({ team: null, field: null, index: null });
+  const [editing, setEditing] = useState({ team: null });
 
-  const handleEdit = (team, field, index = null) => {
-    setEditing({ team, field, index });
-  };
-
-  const handleChange = (value) => {
-    const teamData = editing.team === "home" ? { ...homeTeam } : { ...awayTeam };
-    if (editing.index !== null) {
-      teamData.innings[editing.index] = Number(value);
-    } else {
-      teamData[editing.field] = isNaN(value) ? value : Number(value);
+  const handleScoreChange = (team, value) => {
+    const parsed = parseInt(value);
+    if (!isNaN(parsed)) {
+      team === "home"
+        ? setHomeTeam({ ...homeTeam, score: parsed })
+        : setAwayTeam({ ...awayTeam, score: parsed });
     }
-    editing.team === "home" ? setHomeTeam(teamData) : setAwayTeam(teamData);
-  };
-
-  const handleBlur = () => {
-    setEditing({ team: null, field: null, index: null });
-  };
-
-  const renderCell = (team, field, value, index = null) => {
-    const isEditing =
-      editing.team === team && editing.field === field && editing.index === index;
-    return isEditing ? (
-      <input
-        type={typeof value === "number" ? "number" : "text"}
-        className="w-12 text-center border border-gray-400 rounded text-black"
-        value={value}
-        onChange={(e) => handleChange(e.target.value)}
-        onBlur={handleBlur}
-        autoFocus
-      />
-    ) : (
-      <span
-        className="cursor-pointer hover:text-blue-600"
-        onClick={() => handleEdit(team, field, index)}
-      >
-        {value}
-      </span>
-    );
   };
 
   return (
-    <div className="w-full flex justify-center mt-10">
-      <div className="bg-white text-black shadow-xl rounded-lg overflow-hidden p-6 w-[850px] border-2 border-orange-500">
-        {/* Title */}
-        <div className="mb-4 border-b border-gray-400 pb-2">
-          <h2 className="text-2xl font-bold tracking-wide text-left">SCORE</h2>
-        </div>
+    <div className="flex justify-center mt-10">
+      <div className="bg-white rounded-xl shadow-lg border border-gray-200 w-[850px] overflow-hidden">
+        {/* Orange Top Bar */}
+        <div className="bg-orange-500 h-2 w-full rounded-t-xl"></div>
 
-        {/* Table */}
-        <table className="w-full text-center border-collapse">
-          <thead>
-            <tr className="border-b border-gray-400 text-gray-700">
-              <th className="text-left pl-4">TEAM</th>
-              {[...Array(9)].map((_, i) => (
-                <th key={i}>{i + 1}</th>
-              ))}
-              <th>R</th>
-              <th>H</th>
-              <th>E</th>
-            </tr>
-          </thead>
-          <tbody>
+        {/* Main Content */}
+        <div className="flex flex-col items-center px-6 py-6">
+          {/* Series Info */}
+          <div className="text-gray-600 text-sm mb-4 text-center">
+            Championship: Game 1, Tigers vs Lions
+          </div>
+
+          {/* Scoreboard */}
+          <div className="flex items-center justify-between w-full">
             {/* Away Team */}
-            <tr className="border-b border-gray-300 hover:bg-gray-100">
-              <td className="text-left pl-4 font-semibold">
-                {renderCell("away", "name", awayTeam.name)}
-              </td>
-              {awayTeam.innings.map((val, i) => (
-                <td key={i}>{renderCell("away", "innings", val, i)}</td>
-              ))}
-              <td>{renderCell("away", "runs", awayTeam.runs)}</td>
-              <td>{renderCell("away", "hits", awayTeam.hits)}</td>
-              <td>{renderCell("away", "errors", awayTeam.errors)}</td>
-            </tr>
+            <div className="flex items-center space-x-4 w-1/3">
+              <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-300">
+                <img
+                  src={awayTeam.logo}
+                  alt={awayTeam.name}
+                  className="w-full h-full object-cover object-center"
+                />
+              </div>
+              <div className="flex flex-col items-start">
+                <span className="text-2xl font-bold">{awayTeam.name}</span>
+                <span className="text-sm text-gray-500">{awayTeam.record}</span>
+              </div>
+            </div>
 
-            {/* Spacer between teams */}
-            <tr className="h-2 bg-transparent"></tr>
+            {/* Score Section */}
+            <div className="flex flex-col items-center w-1/3">
+              <div className="flex items-center space-x-4">
+                {/* Away Score */}
+                {editing.team === "away" ? (
+                  <input
+                    type="number"
+                    value={awayTeam.score}
+                    onChange={(e) => handleScoreChange("away", e.target.value)}
+                    onBlur={() => setEditing({ team: null })}
+                    autoFocus
+                    className="w-14 text-center border border-gray-300 rounded text-black"
+                  />
+                ) : (
+                  <span
+                    className="text-5xl font-bold cursor-pointer hover:text-orange-500"
+                    onClick={() => setEditing({ team: "away" })}
+                  >
+                    {awayTeam.score}
+                  </span>
+                )}
+
+                <span className="text-gray-600 font-semibold text-lg">
+                  FINAL 11
+                </span>
+                <span className="text-gray-400 text-2xl">➤</span>
+
+                {/* Home Score */}
+                {editing.team === "home" ? (
+                  <input
+                    type="number"
+                    value={homeTeam.score}
+                    onChange={(e) => handleScoreChange("home", e.target.value)}
+                    onBlur={() => setEditing({ team: null })}
+                    autoFocus
+                    className="w-14 text-center border border-gray-300 rounded text-black"
+                  />
+                ) : (
+                  <span
+                    className="text-5xl font-bold cursor-pointer hover:text-orange-500"
+                    onClick={() => setEditing({ team: "home" })}
+                  >
+                    {homeTeam.score}
+                  </span>
+                )}
+              </div>
+            </div>
 
             {/* Home Team */}
-            <tr className="hover:bg-gray-100">
-              <td className="text-left pl-4 font-semibold">
-                {renderCell("home", "name", homeTeam.name)}
-              </td>
-              {homeTeam.innings.map((val, i) => (
-                <td key={i}>{renderCell("home", "innings", val, i)}</td>
-              ))}
-              <td>{renderCell("home", "runs", homeTeam.runs)}</td>
-              <td>{renderCell("home", "hits", homeTeam.hits)}</td>
-              <td>{renderCell("home", "errors", homeTeam.errors)}</td>
-            </tr>
-          </tbody>
-        </table>
+            <div className="flex items-center justify-end space-x-4 w-1/3">
+              <div className="flex flex-col items-end">
+                <span className="text-2xl font-bold">{homeTeam.name}</span>
+                <span className="text-sm text-gray-500">{homeTeam.record}</span>
+              </div>
+              <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-gray-300">
+                <img
+                  src={homeTeam.logo}
+                  alt={homeTeam.name}
+                  className="w-full h-full object-cover object-center"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
