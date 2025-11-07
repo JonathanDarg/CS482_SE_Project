@@ -1,0 +1,59 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches:
+      - main
+      - ci-setup-branch
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+
+    services:
+      mongodb:
+        image: mongo:latest
+        env:
+          MONGO_INITDB_ROOT_USERNAME: adm
+          MONGO_INITDB_ROOT_PASSWORD: secret
+        ports:
+          - 27017:27017
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          
+      # Install root dependencies and run tests
+      - name: Install root dependencies
+        run: npm ci
+        env:
+          CI: true
+
+      # Install client dependencies
+      - name: Install client dependencies
+        run: npm ci
+        working-directory: view/Sports-League-app
+        env:
+          CI: true
+
+      # Run tests with coverage
+      - name: Run tests
+        run: npm test -- --ci --forceExit --collectCoverage
+        env:
+          CI: true
+          NODE_ENV: test
+          DB_URI: mongodb://adm:secret@localhost:27017
+          TESTDB_URI: mongodb://adm:secret@localhost:27017
