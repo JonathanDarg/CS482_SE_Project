@@ -1,4 +1,5 @@
 import "./App.css";
+import React from "react";
 import Navbar from "./mainpage/Navbar";
 import Footer from "./mainpage/Footer";
 import { Hero } from "./components/Hero";
@@ -6,9 +7,11 @@ import Calendar from "./pages/Calendar";
 import Leaderboard from "./pages/Leaderboard";
 import HomeCalendar from "./pages/HomeCalendar";
 import ImageGallery from "./components/ImageGallery";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import React from "react";
+import Score from "./components/Score";
+import Live from "./pages/Live";
 import CountDownTimer from "./components/CountDownTimer";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
 
 function App() {
 
@@ -39,8 +42,11 @@ function App() {
           />
           <Route path="/Calendar" element={<Calendar />} />
           <Route path="/Leaderboard" element={<Leaderboard />} />
-          <Route path="/Gallery" element={<ImageGallery />} />
+          <Route path="/Gallery" element={<ImageGallery />} /
+
           <Route path="/Countdown" element={<CountDownTimer targetDate={new Date(targetDate).getTime()} />} />
+          <Route path="/Score" element={<Score />} />
+          <Route path="/Live" element={<Live />} />
         </Routes>
       </div>
 

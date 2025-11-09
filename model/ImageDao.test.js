@@ -106,3 +106,30 @@ describe("ImageDao", () => {
     await expect(ImageDao.deleteImage("123")).rejects.toThrow("DB error");
   });
 });
+
+// --- tests for is_minor flag ---
+describe("ImageDao - is_minor flag", () => {
+  const buffer = Buffer.from("abc");
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should create an image with is_minor=false by default", async () => {
+    const savedImage = { name: "Normal Image", image: { data: buffer, contentType: "image/png" }, is_minor: false };
+    mongoose.model().mockImplementation(() => ({ save: jest.fn().mockResolvedValue(savedImage) }));
+
+    const result = await ImageDao.createImage("Normal Image", buffer, "image/png");
+
+    expect(result.is_minor).toBe(false);
+  });
+
+  it("should create an image with is_minor=true when selected", async () => {
+    const savedImage = { name: "Minor Image", image: { data: buffer, contentType: "image/png" }, is_minor: true };
+    mongoose.model().mockImplementation(() => ({ save: jest.fn().mockResolvedValue(savedImage) }));
+
+    const result = await ImageDao.createImage("Minor Image", buffer, "image/png", true);
+
+    expect(result.is_minor).toBe(true);
+  });
+});

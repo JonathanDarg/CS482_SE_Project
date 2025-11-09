@@ -13,10 +13,14 @@ exports.uploadImage = [
         return res.status(400).json({ error: "No image file uploaded" });
       }
 
+      const { is_minor } = req.body; 
+      const minorFlag = is_minor === "true" || is_minor === true;
+
       const newImage = await ImageDao.createImage(
         req.file.originalname,
         req.file.buffer,
-        req.file.mimetype
+        req.file.mimetype,
+        minorFlag
       );
 
       res.status(201).json({

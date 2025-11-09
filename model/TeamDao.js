@@ -29,7 +29,7 @@ exports.updateTeam = async function(id, TeamData){
     if(!Team) return null;
     Team.teamName = TeamData.teamName;
     Team.wins = TeamData.wins;
-    Team.loses = TeamData.loses;
+    Team.losses = TeamData.loses;
     await Team.save();
     return Team;
 }

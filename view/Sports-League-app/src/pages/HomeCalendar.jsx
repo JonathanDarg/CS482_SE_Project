@@ -45,7 +45,7 @@ function HomeCalendar() {
           events={events}
           editable={false}
           selectable={false}
-          height="50%"
+          height="60%"
           dateClick={() => setModalOpen(true)}
           eventClick={() => setModalOpen(true)}
         />
