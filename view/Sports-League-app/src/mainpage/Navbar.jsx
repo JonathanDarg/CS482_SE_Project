@@ -77,10 +77,6 @@ const Navbar = () => {
               <FaEnvelope />
               <Link to="/Contact">Contact</Link>
             </li>
-            <li className="hover:text-orange-300 cursor-pointer flex items-center gap-2">
-              <FaEnvelope />
-              <Link to="/Countdown">Countdown</Link>
-            </li>
           </ul>
 
           <Link to="/Login" className="flex items-center gap-2">
