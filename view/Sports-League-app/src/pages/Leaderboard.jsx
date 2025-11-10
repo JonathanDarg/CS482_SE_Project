@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import styles from "./Leaderboard.module.css";
-//import { set } from "mongoose";
 
 function Leaderboard() {
     const EE = "r";
