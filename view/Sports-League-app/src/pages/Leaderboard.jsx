@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import styles from "./Leaderboard.module.css";
 
 function Leaderboard() {
-    const EE = "r";
-    const dataE = [{id: 1, wins: 1, losses: 2}, {id: 2, wins:3}];
     const [teams, setTeams] = useState([]);
     useEffect(() => {
       
