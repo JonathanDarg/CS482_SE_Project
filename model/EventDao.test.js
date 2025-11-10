@@ -27,7 +27,8 @@ test('create one simple Event', async function(){
         location: "Stuart's House",
         dateTime: new Date('2024-07-01T15:00:00Z'),
         rating: 5,
-        typeOfMatch: "Friendly"
+        typeOfMatch: "Friendly",
+        inning: 1
     };
 
     let Event = await EventDao.createEvent(EventData);
@@ -42,7 +43,8 @@ test('create one Event better test', async function(){
         location: "Stuart's House",
         dateTime: new Date('2024-07-01T15:00:00Z'),
         rating: 5,
-        typeOfMatch: "Friendly"
+        typeOfMatch: "Friendly",
+        inning: 1
     };
 
     let Event = await EventDao.createEvent(EventData);
@@ -62,7 +64,8 @@ test('update one Event', async function(){
         location: "Stuart's House",
         dateTime: new Date('2024-07-01T15:00:00Z'),
         rating: 5,
-        typeOfMatch: "Friendly"
+        typeOfMatch: "Friendly",
+        inning: 1
     };
 
     let Event = await EventDao.createEvent(EventData);
@@ -71,7 +74,8 @@ test('update one Event', async function(){
         location: "Bob's House",
         dateTime: new Date('2024-08-01T15:00:00Z'),
         rating: 3,
-        typeOfMatch: "Competitive"
+        typeOfMatch: "Competitive",
+        inning: 2
     };
 
     let updatedEvent = await EventDao.updateEvent(Event._id, updatedData);
@@ -85,7 +89,9 @@ test('create and delete one Event', async function(){
         location: "Stuart's House",
         dateTime: new Date('2024-07-01T15:00:00Z'),
         rating: 5,
-        typeOfMatch: "Friendly"
+        typeOfMatch: "Friendly",
+        inning: 1
+        
     };
 
     let Event = await EventDao.createEvent(EventData);
@@ -103,21 +109,24 @@ test('readAll with data', async function(){
         location: "Stuart's House",
         dateTime: new Date('2024-07-01T15:00:00Z'),
         rating: 5,
-        typeOfMatch: "Friendly"
+        typeOfMatch: "Friendly",
+        inning: 1
     };
 
     let EventData2 = {
         location: "Bob's House",
         dateTime: new Date('2024-08-01T15:00:00Z'),
         rating: 3,
-        typeOfMatch: "Competitive"
+        typeOfMatch: "Competitive",
+        inning: 2
     };
 
     let EventData3 = {
         location: "Alice's House",
         dateTime: new Date('2024-09-01T15:00:00Z'),
         rating: 4,
-        typeOfMatch: "Tournament"
+        typeOfMatch: "Tournament",
+        inning: 3
     };
 
     await EventDao.createEvent(EventData1);
@@ -134,21 +143,24 @@ test('get Event by month', async function(){
         location: "Stuart's House",
         dateTime: new Date('2024-07-01T15:00:00Z'),
         rating: 5,
-        typeOfMatch: "Friendly"
+        typeOfMatch: "Friendly",
+        inning: 1
     };
 
     let EventData2 = {
         location: "Bob's House",
         dateTime: new Date('2024-08-01T15:00:00Z'),
         rating: 3,
-        typeOfMatch: "Competitive"
+        typeOfMatch: "Competitive",
+        inning: 2
     };
 
     let EventData3 = {
         location: "Alice's House",
         dateTime: new Date('2024-09-01T15:00:00Z'),
         rating: 4,
-        typeOfMatch: "Tournament"
+        typeOfMatch: "Tournament",
+        inning: 3
     };
 
     await EventDao.createEvent(EventData1);

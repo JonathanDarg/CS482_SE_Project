@@ -11,6 +11,9 @@ import Score from "./components/Score";
 import Live from "./pages/Live";
 import CountDownTimer from "./components/CountDownTimer";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import React from "react";
+import CountDownTimer from "./components/CountDownTimer";
+import CountDown from "./pages/Countdown";
 
 
 function App() {
@@ -43,6 +46,7 @@ function App() {
           <Route path="/Calendar" element={<Calendar />} />
           <Route path="/Leaderboard" element={<Leaderboard />} />
           <Route path="/Gallery" element={<ImageGallery />} />
+          <Route path="/Countdown" element={<CountDown />} />
 
           <Route path="/Countdown" element={<CountDownTimer targetDate={new Date(targetDate).getTime()} />} />
           <Route path="/Score" element={<Score />} />

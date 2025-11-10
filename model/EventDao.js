@@ -4,7 +4,8 @@ const EventSchema = new mongoose.Schema({
     location: String,
     dateTime: {type: Date, default: Date.now},
     rating: Number,
-    typeOfMatch: String
+    typeOfMatch: String,
+    inning: Number
 });
 
 const EventModel = mongoose.model('Event', EventSchema);

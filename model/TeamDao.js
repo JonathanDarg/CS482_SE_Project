@@ -2,8 +2,8 @@ const mongoose = require('mongoose');
 
 const TeamSchema = new mongoose.Schema({
     teamName: String,
-    wins: int,
-    losses: int
+    wins: Number,
+    losses: Number
 });
 
 const TeamModel = mongoose.model('Team', TeamSchema);
