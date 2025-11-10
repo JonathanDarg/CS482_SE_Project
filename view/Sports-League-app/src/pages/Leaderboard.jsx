@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import "./Leaderboard.css";
+import styles from "./Leaderboard.module.css";
 //import { set } from "mongoose";
 
 function Leaderboard() {
@@ -29,7 +29,7 @@ function Leaderboard() {
     }
   };
     return(
-        <div className="leaderboard-page">
+        <div className={styles["leaderboard-page"]}>
       <h1>Team Leaderboard</h1>
       <br></br>
       <table>
