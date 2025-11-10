@@ -7,6 +7,8 @@ db.connect(); // Connect to MongoDB
 
 const eventController = require("./controller/EventController");
 const imageController = require("./controller/ImageController");
+const teamController = require("./controller/teamController");
+
 
 const app = express();
 app.use(cors());
@@ -25,6 +27,10 @@ app.post("/api/images/upload", imageController.uploadImage);
 app.get("/api/images", imageController.getImages);
 app.get("/api/images/:id", imageController.getImageById);
 app.delete("/api/images/:id", imageController.deleteImage);
+
+// Team routes
+app.get("/api/teams", teamController.getAllTeams);
+app.get("/api/teams/:id", teamController.getTeam);
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
