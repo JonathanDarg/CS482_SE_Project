@@ -44,9 +44,8 @@ function App() {
           <Route path="/Calendar" element={<Calendar />} />
           <Route path="/Leaderboard" element={<Leaderboard />} />
           <Route path="/Gallery" element={<ImageGallery />} />
-          <Route path="/Countdown" element={<CountDown />} />
 
-          <Route path="/Countdown" element={<CountDownTimer targetDate={new Date(targetDate).getTime()} />} />
+          <Route path="/Countdown" element={<CountDown />} />
           <Route path="/Score" element={<Score />} />
           <Route path="/Live" element={<Live />} />
         </Routes>

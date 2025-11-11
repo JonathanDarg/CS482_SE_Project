@@ -59,3 +59,8 @@ exports.deleteAll = async function name(){
     await EventModel.deleteMany();
 }
 
+exports.getNextEvent = async function(){
+    let now = new Date();
+    let Event = await EventModel.findOne({dateTime: {$gte: now}}).sort({dateTime: 1});
+    return Event;
+}
