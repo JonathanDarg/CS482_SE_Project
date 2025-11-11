@@ -11,8 +11,6 @@ import Score from "./components/Score";
 import Live from "./pages/Live";
 import CountDownTimer from "./components/CountDownTimer";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import React from "react";
-import CountDownTimer from "./components/CountDownTimer";
 import CountDown from "./pages/Countdown";
 
 
