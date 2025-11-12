@@ -13,6 +13,7 @@ import CountDownTimer from "./components/CountDownTimer";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import About from "./components/About";
 
 
 function App() {
@@ -30,9 +31,7 @@ function App() {
             element={
               <div className="grow">
                 <Hero />
-                <h2 className="text-center text-4xl font-bold text-orange-500 mb-4">
-                  Youth Sports League
-                </h2>
+                <About />
 
                 {/* Calendar and Gallery */}
                 <div className="flex gap-2 p-4 items-start justify-center">
@@ -50,8 +49,10 @@ function App() {
           <Route path="/Score" element={<Score />} />
           <Route path="/Live" element={<Live />} />
 
-                    <Route path="/Login" element={<Login />} />
+          <Route path="/Login" element={<Login />} />
           <Route path="/Signup" element={<Signup />} />
+
+          <Route path="/About" element={<About />} />
         </Routes>
       </div>
 
