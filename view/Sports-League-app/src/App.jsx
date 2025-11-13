@@ -10,6 +10,7 @@ import ImageGallery from "./components/ImageGallery";
 import Score from "./components/Score";
 import Live from "./pages/Live";
 import CountDownTimer from "./components/CountDownTimer";
+import CountDown from "./pages/Countdown";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -45,7 +46,7 @@ function App() {
           <Route path="/Leaderboard" element={<Leaderboard />} />
           <Route path="/Gallery" element={<ImageGallery />} />
 
-          <Route path="/Countdown" element={<CountDownTimer targetDate={new Date(targetDate).getTime()} />} />
+          <Route path="/Countdown" element={<CountDown />} />
           <Route path="/Score" element={<Score />} />
           <Route path="/Live" element={<Live />} />
 
