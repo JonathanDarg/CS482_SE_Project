@@ -43,16 +43,16 @@ export function Leaderboard() {
   };
 
   return (
-    <section className="py-20 px-6 bg-gradient-to-br from-gray-50 to-white">
+    <section className="py-20 px-6 bg-linear-to-br from-gray-50 to-white">
       <div className="max-w-7xl mx-auto">
         {/* Title */}
         <div className="text-center mb-16">
           <div className="inline-block mb-6">
-            <div className="bg-gradient-to-r from-orange-600 to-orange-400 p-4 rounded-full">
+            <div className="bg-linear-to-r from-orange-600 to-orange-400 p-4 rounded-full">
               <Trophy className="text-white" size={48} />
             </div>
           </div>
-          <h2 className="text-5xl mb-4 bg-gradient-to-r from-orange-600 to-orange-400 bg-clip-text text-transparent font-semibold">
+          <h2 className="text-5xl mb-4 bg-linear-to-r from-orange-600 to-orange-400 bg-clip-text text-transparent font-semibold">
             League Standings
           </h2>
           <p className="text-xl text-gray-600">
@@ -66,7 +66,7 @@ export function Leaderboard() {
             {/* 2nd Place */}
             {teams[1] && (
               <div className="flex-1 max-w-[200px]">
-                <Card className="bg-gradient-to-br from-gray-100 to-gray-200 border-4 border-gray-300 shadow-lg transform transition-transform hover:scale-105">
+                <Card className="bg-linear-to-br from-gray-100 to-gray-200 border-4 border-gray-300 shadow-lg transform transition-transform hover:scale-105">
                   <CardContent className="pt-6 pb-8 text-center">
                     <div className="mb-3 flex justify-center">
                       {getRankIcon(2, 40)}
@@ -89,7 +89,7 @@ export function Leaderboard() {
             {/* 1st Place */}
             {teams[0] && (
               <div className="flex-1 max-w-[220px]">
-                <Card className="bg-gradient-to-br from-yellow-300 to-yellow-500 border-4 border-yellow-400 shadow-2xl transform transition-transform hover:scale-105">
+                <Card className="bg-linear-to-br from-yellow-300 to-yellow-500 border-4 border-yellow-400 shadow-2xl transform transition-transform hover:scale-105">
                   <CardContent className="pt-8 pb-10 text-center">
                     <div className="mb-4 flex justify-center">
                       {getRankIcon(1, 48)}
@@ -112,7 +112,7 @@ export function Leaderboard() {
             {/* 3rd Place */}
             {teams[2] && (
               <div className="flex-1 max-w-[200px]">
-                <Card className="bg-gradient-to-br from-orange-200 to-orange-400 border-4 border-orange-300 shadow-lg transform transition-transform hover:scale-105">
+                <Card className="bg-linear-to-br from-orange-200 to-orange-400 border-4 border-orange-300 shadow-lg transform transition-transform hover:scale-105">
                   <CardContent className="pt-6 pb-6 text-center">
                     <div className="mb-3 flex justify-center">
                       {getRankIcon(3, 36)}
@@ -136,7 +136,7 @@ export function Leaderboard() {
 
         {/* Table Section */}
         <Card className="shadow-xl border-2 border-gray-200">
-          <CardHeader className="bg-gradient-to-r from-orange-500 to-orange-400 text-white">
+          <CardHeader className="bg-linear-to-r from-orange-500 to-orange-400 text-white">
             <CardTitle className="text-center text-2xl">Minor League Standings</CardTitle>
           </CardHeader>
           <CardContent className="pt-6">
