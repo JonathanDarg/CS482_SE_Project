@@ -15,6 +15,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import About from "./components/About";
+import Seasons from "./pages/Seasons";
 
 
 function App() {
@@ -54,6 +55,7 @@ function App() {
           <Route path="/Signup" element={<Signup />} />
 
           <Route path="/About" element={<About />} />
+          <Route path="/Seasons" element={<Seasons />} />
         </Routes>
       </div>
 
