@@ -14,6 +14,8 @@ function Calendar() {
     typeOfMatch: "",
     rating: "",
     dateTime: "",
+    homeTeam: "",
+    awayTeam: "",
   });
 
   // Load events when page loads
@@ -31,12 +33,14 @@ function Calendar() {
       setEvents(
         data.map((e) => ({
           id: e._id,
-          title: `${e.typeOfMatch} @ ${e.location}`,
+          title: `${e.homeTeam?.name || ""} vs ${e.awayTeam?.name || ""} @ ${e.location}`,
           date: e.dateTime,
           extendedProps: {
             location: e.location,
             rating: e.rating,
             typeOfMatch: e.typeOfMatch,
+            homeTeam: e.homeTeam,
+            awayTeam: e.awayTeam,
           },
         }))
       );
@@ -50,8 +54,10 @@ function Calendar() {
     setFormData({
       location: "",
       typeOfMatch: "",
-      rating: "", // rating ignored on add
+      rating: "",
       dateTime: info.dateStr + "T12:00",
+      homeTeam: "",
+      awayTeam: "",
     });
     setModalOpen(true);
   };
@@ -60,8 +66,13 @@ function Calendar() {
   const handleAddEvent = async (e) => {
     e.preventDefault();
 
-    const dataToSend = { ...formData };
-    delete dataToSend.rating; // ignore rating when adding
+    const dataToSend = {
+      location: formData.location,
+      typeOfMatch: formData.typeOfMatch,
+      dateTime: formData.dateTime,
+      homeTeam: { name: formData.homeTeam },
+      awayTeam: { name: formData.awayTeam },
+    };
 
     try {
       const res = await fetch("http://localhost:4000/api/events", {
@@ -87,6 +98,8 @@ function Calendar() {
       typeOfMatch: event.extendedProps.typeOfMatch,
       rating: event.extendedProps.rating || "",
       dateTime: event.startStr.slice(0, 16),
+      homeTeam: event.extendedProps.homeTeam?.name || "",
+      awayTeam: event.extendedProps.awayTeam?.name || "",
     });
     setEditModalOpen(true);
   };
@@ -95,13 +108,22 @@ function Calendar() {
   const handleUpdateEvent = async (e) => {
     e.preventDefault();
 
+    const dataToSend = {
+      location: formData.location,
+      typeOfMatch: formData.typeOfMatch,
+      dateTime: formData.dateTime,
+      homeTeam: { name: formData.homeTeam },
+      awayTeam: { name: formData.awayTeam },
+      rating: formData.rating,
+    };
+
     try {
       const res = await fetch(
         `http://localhost:4000/api/events/${selectedEvent.id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
+          body: JSON.stringify(dataToSend),
         }
       );
 
@@ -179,6 +201,28 @@ function Calendar() {
                 />
               </label>
               <label>
+                Home Team:
+                <input
+                  type="text"
+                  value={formData.homeTeam}
+                  onChange={(e) =>
+                    setFormData({ ...formData, homeTeam: e.target.value })
+                  }
+                  required
+                />
+              </label>
+              <label>
+                Away Team:
+                <input
+                  type="text"
+                  value={formData.awayTeam}
+                  onChange={(e) =>
+                    setFormData({ ...formData, awayTeam: e.target.value })
+                  }
+                  required
+                />
+              </label>
+              <label>
                 Date and Time:
                 <input
                   type="datetime-local"
@@ -224,6 +268,28 @@ function Calendar() {
                   value={formData.typeOfMatch}
                   onChange={(e) =>
                     setFormData({ ...formData, typeOfMatch: e.target.value })
+                  }
+                  required
+                />
+              </label>
+              <label>
+                Home Team:
+                <input
+                  type="text"
+                  value={formData.homeTeam}
+                  onChange={(e) =>
+                    setFormData({ ...formData, homeTeam: e.target.value })
+                  }
+                  required
+                />
+              </label>
+              <label>
+                Away Team:
+                <input
+                  type="text"
+                  value={formData.awayTeam}
+                  onChange={(e) =>
+                    setFormData({ ...formData, awayTeam: e.target.value })
                   }
                   required
                 />

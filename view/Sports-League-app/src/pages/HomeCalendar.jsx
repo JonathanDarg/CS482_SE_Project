@@ -22,8 +22,14 @@ function HomeCalendar() {
       setEvents(
         data.map((e) => ({
           id: e._id,
-          title: `${e.typeOfMatch} @ ${e.location}`,
+          title: `${e.homeTeam?.name || "Home"} vs ${e.awayTeam?.name || "Away"} @ ${e.location}`,
           date: e.dateTime,
+          extendedProps: {
+            location: e.location,
+            typeOfMatch: e.typeOfMatch,
+            homeTeam: e.homeTeam,
+            awayTeam: e.awayTeam,
+          },
         }))
       );
     } catch (err) {
