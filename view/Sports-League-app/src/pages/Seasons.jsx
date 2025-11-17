@@ -58,8 +58,14 @@ export function Seasons() {
     return 'tie';
   };
 
-  const AWAY_LOGO = "/images/lion.jpg";   
-  const HOME_LOGO = "/images/tiger.jpg";  
+  const LIONS_LOGO = "/images/logos/lion.jpg";   
+  const TIGERS_LOGO = "/images/logos/tiger.jpg";
+  const COBRAS_LOGO = "/images/logos/cobra.jpg";
+  const EAGLES_LOGO = "/images/logos/eagle.jpg";
+  const WOLVES_LOGO = "/images/logos/wolves.jpg";
+  const SHARKS_LOGO = "/images/logos/shark.jpg";  
+  const PANTHERS_LOGO = "/images/logos/panther.jpg";
+  const DRAGONS_LOGO = "/images/logos/dragon.png";
 
   return (
     <section className="py-20 px-6 bg-white">
@@ -183,7 +189,7 @@ export function Seasons() {
                             </div>
 
                             <div className="w-12 h-12 rounded-full overflow-hidden border border-gray-300">
-                              <img src={AWAY_LOGO} className="w-full h-full object-cover" />
+                              <img src={PANTHERS_LOGO} className="w-full h-full object-cover" />
                             </div>
                           </div>
 
@@ -205,7 +211,7 @@ export function Seasons() {
                           {/* Home Team */}
                           <div className="flex items-center space-x-3 w-1/3">
                             <div className="w-12 h-12 rounded-full overflow-hidden border border-gray-300">
-                              <img src={HOME_LOGO} className="w-full h-full object-cover" />
+                              <img src={DRAGONS_LOGO} className="w-full h-full object-cover" />
                             </div>
                             <div className="flex flex-col items-start">
                               <span className={`text-2xl font-bold ${result === 'home' ? 'text-black' : 'text-gray-400'}`}>

@@ -9,7 +9,6 @@ import HomeCalendar from "./pages/HomeCalendar";
 import ImageGallery from "./components/ImageGallery";
 import Score from "./components/Score";
 import Live from "./pages/Live";
-import CountDownTimer from "./components/CountDownTimer";
 import CountDown from "./pages/Countdown";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
@@ -19,8 +18,6 @@ import Seasons from "./pages/Seasons";
 
 
 function App() {
-
-  const targetDate = "2025-12-31T23:59:59"; // Example target date
 
   return (
     <Router>
