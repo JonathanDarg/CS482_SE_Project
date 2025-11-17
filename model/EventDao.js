@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const EventSchema = new mongoose.Schema({
     location: String,
     dateTime: {type: Date, default: Date.now},
+    homeTeam: Object,
+    awayTeam: Object,
     rating: Number,
     typeOfMatch: String,
     inning: Number
@@ -36,7 +38,7 @@ exports.getByMonth = async function(month, year){
             $lt: endDate
         }
     });
-    
+
     return Events;
 }
 
@@ -45,8 +47,11 @@ exports.updateEvent = async function(id, EventData){
     if(!Event) return null;
     Event.location = EventData.location;
     Event.dateTime = EventData.dateTime;
+    Event.homeTeam = EventData.homeTeam;
+    Event.awayTeam = EventData.awayTeam;
     Event.rating = EventData.rating;
     Event.typeOfMatch = EventData.typeOfMatch;
+    Event.inning = EventData.inning;
     await Event.save();
     return Event;
 }
@@ -55,7 +60,7 @@ exports.deleteEvent = async function(id){
     await EventModel.findByIdAndDelete(id);
 }
 
-exports.deleteAll = async function name(){
+exports.deleteAll = async function(){
     await EventModel.deleteMany();
 }
 

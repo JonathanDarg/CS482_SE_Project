@@ -19,8 +19,16 @@ describe('EventController', () => {
 
   // ---- CREATE Event ----
   describe('createEvent', () => {
-    it('should create a new Event and return 201', async () => {
-      const fakeEvent = { location: 'Park', dateTime: '2025-05-10T12:00', rating: 5, typeOfMatch: 'friendly' };
+    it('should create a new Event and return 201 with teams', async () => {
+      const fakeEvent = {
+        location: 'Park',
+        dateTime: '2025-05-10T12:00',
+        rating: 5,
+        typeOfMatch: 'friendly',
+        homeTeam: { name: 'Lions' },
+        awayTeam: { name: 'Tigers' },
+        inning: 1
+      };
       req.body = fakeEvent;
 
       dao.createEvent.mockResolvedValue(fakeEvent);
@@ -42,10 +50,13 @@ describe('EventController', () => {
     });
   });
 
-  // ---- GET ALL EventS ----
+  // ---- GET ALL Events ----
   describe('getAllEvents', () => {
-    it('should return all Events', async () => {
-      const Events = [{ id: 1 }, { id: 2 }];
+    it('should return all Events with teams', async () => {
+      const Events = [
+        { id: 1, homeTeam: { name: 'Lions' }, awayTeam: { name: 'Tigers' } },
+        { id: 2, homeTeam: { name: 'Eagles' }, awayTeam: { name: 'Sharks' } }
+      ];
       dao.getAllEvents.mockResolvedValue(Events);
 
       await controller.getAllEvents(req, res);
@@ -65,9 +76,14 @@ describe('EventController', () => {
 
   // ---- GET ONE Event ----
   describe('getEvent', () => {
-    it('should return one Event by id', async () => {
+    it('should return one Event by id with teams', async () => {
       req.params.id = '1';
-      const Event = { id: '1', location: 'Park' };
+      const Event = {
+        id: '1',
+        location: 'Park',
+        homeTeam: { name: 'Lions' },
+        awayTeam: { name: 'Tigers' }
+      };
       dao.readOneEvent.mockResolvedValue(Event);
 
       await controller.getEvent(req, res);
@@ -98,15 +114,24 @@ describe('EventController', () => {
 
   // ---- UPDATE Event ----
   describe('updateEvent', () => {
-    it('should update a Event', async () => {
+    it('should update a Event with teams', async () => {
       req.params.id = '1';
-      req.body = { rating: 4 };
-      const updated = { id: '1', rating: 4 };
+      req.body = {
+        rating: 4,
+        homeTeam: { name: 'Lions' },
+        awayTeam: { name: 'Tigers' }
+      };
+      const updated = {
+        id: '1',
+        rating: 4,
+        homeTeam: { name: 'Lions' },
+        awayTeam: { name: 'Tigers' }
+      };
       dao.updateEvent.mockResolvedValue(updated);
 
       await controller.updateEvent(req, res);
 
-      expect(dao.updateEvent).toHaveBeenCalledWith('1', { rating: 4 });
+      expect(dao.updateEvent).toHaveBeenCalledWith('1', req.body);
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(updated);
     });
@@ -154,7 +179,10 @@ describe('EventController', () => {
   describe('getByMonth', () => {
     it('should return Events for a given month and year', async () => {
       req.params = { month: '05', year: '2025' };
-      const Events = [{ id: 1 }, { id: 2 }];
+      const Events = [
+        { id: 1, homeTeam: { name: 'Lions' }, awayTeam: { name: 'Tigers' } },
+        { id: 2, homeTeam: { name: 'Eagles' }, awayTeam: { name: 'Sharks' } }
+      ];
       dao.getByMonth.mockResolvedValue(Events);
 
       await controller.getByMonth(req, res);
