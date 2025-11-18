@@ -15,10 +15,10 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import About from "./components/About";
 import Seasons from "./pages/Seasons";
+import Community from "./components/Community";
 
 
 function App() {
-
   return (
     <Router>
       <Navbar />
@@ -33,10 +33,13 @@ function App() {
                 <About />
 
                 {/* Calendar and Gallery */}
-                <div className="flex gap-2 p-4 items-start justify-center">
+                <div className="flex gap-2 items-start justify-center">
                   <HomeCalendar />
                   <ImageGallery />
                 </div>
+
+                {/* Community Section */}
+                <Community />
               </div>
             }
           />
@@ -53,6 +56,7 @@ function App() {
 
           <Route path="/About" element={<About />} />
           <Route path="/Seasons" element={<Seasons />} />
+          <Route path="/Community" element={<Community />} />
         </Routes>
       </div>
 
