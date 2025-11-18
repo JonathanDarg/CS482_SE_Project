@@ -2,13 +2,7 @@
 
 import React from "react";
 import { Card, CardContent } from "../ui/card";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "../ui/carousel";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "../ui/carousel";
 
 export function Community() {
   const communityPhotos = [
