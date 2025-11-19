@@ -17,6 +17,7 @@ import About from "./components/About";
 import Seasons from "./pages/Seasons";
 import Community from "./components/Community";
 import Excellence from "./components/Excellence";
+import Sportsmanship from "./components/Sportsmanship";
 
 
 function App() {
@@ -39,8 +40,16 @@ function App() {
                   <ImageGallery />
                 </div>
 
-                <Community />
-                <Excellence />
+                {/* Community Section */}
+                <div id="community">
+                  <Community />
+                </div>
+                <div id="excellence">
+                  <Excellence />
+                </div>
+                <div id="sportsmanship">
+                  <Sportsmanship />
+                </div>
               </div>
             }
           />
@@ -59,6 +68,7 @@ function App() {
           <Route path="/Seasons" element={<Seasons />} />
           <Route path="/Community" element={<Community />} />
           <Route path="/Excellence" element={<Excellence />} />
+          <Route path="/Sportsmanship" element={<Sportsmanship />} />
         </Routes>
       </div>
 

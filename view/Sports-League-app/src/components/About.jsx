@@ -1,4 +1,5 @@
 import { Users, Trophy, Heart } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 
 export function About() {
   const values = [
@@ -18,6 +19,32 @@ export function About() {
       description: 'Instilling respect, integrity, and fair play in every game'
     }
   ];
+
+  const location = useLocation();
+
+  const targetMap = {
+    Community: 'community',
+    Excellence: 'excellence',
+    Sportsmanship: 'sportsmanship',
+  };
+
+  function scrollToId(id) {
+    if (!id) return;
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function handleCardClick(title) {
+    const target = targetMap[title];
+    if (!target) return;
+    // If we're on the home route, scroll directly. Otherwise navigate to home with a hash.
+    if (location.pathname === '/' || location.pathname === '') {
+      scrollToId(target);
+    } else {
+      // Use full navigation to root with hash so browser scrolls after navigation
+      window.location.href = `/#${target}`;
+    }
+  }
 
   return (
     <section id="about" className="py-20 px-6 bg-white">
@@ -59,7 +86,11 @@ export function About() {
           {values.map((value, index) => (
             <div
               key={index}
-              className="text-center p-6 rounded-lg border-2 border-gray-200 hover:border-orange-500 transition-colors flex flex-col items-center justify-start h-[280px]"
+              role="button"
+              tabIndex={0}
+              onClick={() => handleCardClick(value.title)}
+              onKeyDown={(e) => e.key === 'Enter' && handleCardClick(value.title)}
+              className="cursor-pointer text-center p-6 rounded-lg border-2 border-gray-200 hover:border-orange-500 transition-colors flex flex-col items-center justify-start h-[280px]"
             >
               <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <value.icon className="text-white" size={32} />
