@@ -55,7 +55,7 @@ export function Sportsmanship() {
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
         <div className="text-center mb-16">
-          <h2 className="text-5xl mb-3 inline-block relative">
+          <h2 id="sportsmanship-title" className="text-5xl mb-3 inline-block relative">
             Sportsmanship
             <div className="absolute -bottom-2 left-0 right-0 h-1 bg-linear-to-r from-orange-500 to-orange-600"></div>
           </h2>

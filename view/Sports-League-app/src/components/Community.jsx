@@ -62,7 +62,7 @@ export function Community() {
 
         {/* Header */}
         <div className="text-center mb-8 px-4">
-          <h2 className="text-5xl mb-3 inline-block relative">
+          <h2 id="community-title" className="text-5xl mb-3 inline-block relative">
             Our Community
             <span className="absolute -bottom-2 left-0 right-0 h-1 bg-linear-to-r from-orange-500 to-orange-400"></span>
           </h2>

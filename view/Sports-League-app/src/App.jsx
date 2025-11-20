@@ -1,5 +1,6 @@
 import "./App.css";
 import React from "react";
+import useHashScroll from "./hooks/useHashScroll";
 import Navbar from "./mainpage/Navbar";
 import Footer from "./mainpage/Footer";
 import { Hero } from "./components/Hero";
@@ -21,8 +22,14 @@ import Sportsmanship from "./components/Sportsmanship";
 
 
 function App() {
+  function HashScrollActivator() {
+    useHashScroll();
+    return null;
+  }
+
   return (
     <Router>
+      <HashScrollActivator />
       <Navbar />
 
       <div className="min-h-[80vh] flex flex-col justify-between">
@@ -34,13 +41,9 @@ function App() {
                 <Hero />
                 <About />
 
-                {/* Calendar and Gallery */}
-                <div className="flex gap-2 items-start justify-center">
-                  <HomeCalendar />
-                  <ImageGallery />
-                </div>
+                <HomeCalendar />
 
-                {/* Community Section */}
+                {/* About card Section */}
                 <div id="community">
                   <Community />
                 </div>

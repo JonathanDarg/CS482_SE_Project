@@ -37,8 +37,8 @@ export function Excellence() {
     <section className="py-20 px-6 bg-white relative overflow-hidden">
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-5xl mb-3 inline-block relative">
+          <div className="text-center mb-16">
+          <h2 id="excellence-title" className="text-5xl mb-3 inline-block relative">
             Excellence
             <div className="absolute -bottom-2 left-0 right-0 h-1 bg-linear-to-r from-orange-600 to-orange-400" />
           </h2>

@@ -23,15 +23,19 @@ export function About() {
   const location = useLocation();
 
   const targetMap = {
-    Community: 'community',
-    Excellence: 'excellence',
-    Sportsmanship: 'sportsmanship',
+    Community: 'community-title',
+    Excellence: 'excellence-title',
+    Sportsmanship: 'sportsmanship-title',
   };
 
   function scrollToId(id) {
     if (!id) return;
     const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (!el) return;
+    const nav = document.querySelector('nav');
+    const navHeight = nav ? nav.offsetHeight : 0;
+    const top = el.getBoundingClientRect().top + window.scrollY - navHeight - 8;
+    window.scrollTo({ top, behavior: 'smooth' });
   }
 
   function handleCardClick(title) {
