@@ -46,6 +46,7 @@ function App() {
                 {/* About card Section */}
                 <div id="community">
                   <Community />
+                   <ImageGallery />
                 </div>
                 <div id="excellence">
                   <Excellence />
