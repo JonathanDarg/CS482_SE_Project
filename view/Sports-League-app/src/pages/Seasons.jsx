@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Card, CardContent } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { ScrollArea } from '../ui/Scroll-area';
-import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
 import { Calendar, Hourglass, Trophy } from 'lucide-react';
 
 export function Seasons() {
@@ -41,15 +40,9 @@ export function Seasons() {
   });
 
   const [selectedSeason, setSelectedSeason] = useState('2026');
-  const [selectedDivision, setSelectedDivision] = useState('all');
 
   const currentSeasonData = seasons.find(s => s.year === selectedSeason);
-  const filteredGames =
-    currentSeasonData?.games.filter(game =>
-      selectedDivision === 'all' || game.division === selectedDivision
-    ) || [];
-
-  const divisions = ['all', 'Major League', 'Minor League', 'Junior League'];
+  const games = currentSeasonData?.games || [];
 
   const getGameResult = (game) => {
     if (game.status === 'upcoming') return null;
@@ -58,14 +51,21 @@ export function Seasons() {
     return 'tie';
   };
 
-  const LIONS_LOGO = "/images/logos/lion.jpg";   
-  const TIGERS_LOGO = "/images/logos/tiger.jpg";
-  const COBRAS_LOGO = "/images/logos/cobra.jpg";
-  const EAGLES_LOGO = "/images/logos/eagle.jpg";
-  const WOLVES_LOGO = "/images/logos/wolves.jpg";
-  const SHARKS_LOGO = "/images/logos/shark.jpg";  
-  const PANTHERS_LOGO = "/images/logos/panther.jpg";
-  const DRAGONS_LOGO = "/images/logos/dragon.png";
+  const TEAM_LOGOS = {
+    Lions: "/images/logos/lion.jpg",
+    Tigers: "/images/logos/tiger.jpg",
+    Cobras: "/images/logos/cobra.jpg",
+    Eagles: "/images/logos/eagle.jpg",
+    Wolves: "/images/logos/wolves.jpg",
+    Sharks: "/images/logos/shark.jpg",
+    Panthers: "/images/logos/panther.jpg",
+    Dragons: "/images/logos/dragon.png",
+    Rockets: "/images/logos/rockets.jpg",
+    Comets: "/images/logos/comets.jpg",
+    Knights: "/images/logos/knights.jpg",
+    Bears: "/images/logos/bears.png",
+    Hawks: "/images/logos/hawks.png"
+  };
 
   return (
     <section className="py-20 px-6 bg-white">
@@ -106,43 +106,22 @@ export function Seasons() {
           </ScrollArea>
         </div>
 
-        {/* Division Tabs */}
-        <Tabs value={selectedDivision} onValueChange={setSelectedDivision} className="mb-8">
-          <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-4 h-auto">
-            {divisions.map((division) => (
-              <TabsTrigger
-                key={division}
-                value={division}
-                className="
-                  capitalize py-3
-                  data-[state=active]:bg-orange-600
-                  data-[state=active]:text-white
-                "
-              >
-                {division === 'all' ? 'All Divisions' : division}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
-
         {/* Game List */}
         <div className="space-y-4">
-          {filteredGames.length === 0 ? (
+          {games.length === 0 ? (
             <Card className="p-12 text-center">
-              <p className="text-xl text-gray-400">No games found for this selection</p>
+              <p className="text-xl text-gray-400">No games found for this season</p>
             </Card>
           ) : (
-            filteredGames.map((game) => {
+            games.map((game) => {
               const result = getGameResult(game);
 
-              // Middle display content for arrow + FINAL / tie / upcoming
               let middleDisplay;
               if (game.status === 'upcoming') {
                 middleDisplay = <span className="text-gray-400 text-3xl">:</span>;
               } else if (result === 'tie') {
                 middleDisplay = <span className="text-gray-400 text-2xl">-</span>;
               } else if (result === 'away') {
-                // Arrow on left for away win
                 middleDisplay = (
                   <span className="flex items-center space-x-1">
                     <span className="text-orange-600 text-3xl">⮜</span>
@@ -150,7 +129,6 @@ export function Seasons() {
                   </span>
                 );
               } else if (result === 'home') {
-                // Arrow on right for home win
                 middleDisplay = (
                   <span className="flex items-center space-x-1">
                     <span className="text-black font-semibold text-lg">FINAL</span>
@@ -173,7 +151,6 @@ export function Seasons() {
                       <div className="bg-gray-50 p-6 text-center border-r">
                         <p className="text-sm text-gray-500 mb-1">{game.date}</p>
                         <p className="text-gray-700">{game.field}</p>
-                        <Badge className="mt-2" variant="outline">{game.division}</Badge>
                       </div>
 
                       {/* Middle Score + Teams */}
@@ -189,7 +166,7 @@ export function Seasons() {
                             </div>
 
                             <div className="w-12 h-12 rounded-full overflow-hidden border border-gray-300">
-                              <img src={PANTHERS_LOGO} className="w-full h-full object-cover" />
+                              <img src={TEAM_LOGOS[game.awayTeam]} className="w-full h-full object-cover" />
                             </div>
                           </div>
 
@@ -211,7 +188,7 @@ export function Seasons() {
                           {/* Home Team */}
                           <div className="flex items-center space-x-3 w-1/3">
                             <div className="w-12 h-12 rounded-full overflow-hidden border border-gray-300">
-                              <img src={DRAGONS_LOGO} className="w-full h-full object-cover" />
+                              <img src={TEAM_LOGOS[game.homeTeam]} className="w-full h-full object-cover" />
                             </div>
                             <div className="flex flex-col items-start">
                               <span className={`text-2xl font-bold ${result === 'home' ? 'text-black' : 'text-gray-400'}`}>
@@ -223,10 +200,7 @@ export function Seasons() {
                       </div>
 
                       {/* Right: Status Bar */}
-                      <div className={`
-                        p-6 text-center border-l
-                        ${game.status === 'upcoming' ? 'bg-gray-100' : 'bg-gray-50'}
-                      `}>
+                      <div className={`p-6 text-center border-l ${game.status === 'upcoming' ? 'bg-gray-100' : 'bg-gray-50'}`}>
                         {game.status === 'upcoming' ? (
                           <>
                             <Hourglass size={32} className="mx-auto mb-2 text-gray-500" />
@@ -249,7 +223,6 @@ export function Seasons() {
             })
           )}
         </div>
-
       </div>
     </section>
   );

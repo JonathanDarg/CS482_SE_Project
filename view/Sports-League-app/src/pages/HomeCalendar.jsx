@@ -43,7 +43,14 @@ function HomeCalendar() {
     // Sync the list view with the calendar view
     if (listRef.current) {
       const listApi = listRef.current.getApi();
-      listApi.gotoDate(dateInfo.start);
+      try {
+        const start = dateInfo.start instanceof Date ? dateInfo.start : new Date(dateInfo.start);
+        const end = dateInfo.end instanceof Date ? dateInfo.end : new Date(dateInfo.end);
+        const mid = new Date((start.getTime() + end.getTime()) / 2);
+        listApi.gotoDate(mid);
+      } catch (err) {
+        listApi.gotoDate(dateInfo.start);
+      }
     }
   };
 

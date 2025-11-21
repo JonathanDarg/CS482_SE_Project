@@ -11,6 +11,7 @@ function Calendar() {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [formData, setFormData] = useState({
     location: "",
+    field: "",
     typeOfMatch: "",
     rating: "",
     dateTime: "",
@@ -33,10 +34,11 @@ function Calendar() {
       setEvents(
         data.map((e) => ({
           id: e._id,
-          title: `${e.homeTeam?.name || ""} vs ${e.awayTeam?.name || ""} @ ${e.location}`,
+          title: `${e.homeTeam?.teamName || e.homeTeam?.name || ""} vs ${e.awayTeam?.teamName || e.awayTeam?.name || ""} @ ${e.field || e.location}`,
           date: e.dateTime,
           extendedProps: {
             location: e.location,
+            field: e.field,
             rating: e.rating,
             typeOfMatch: e.typeOfMatch,
             homeTeam: e.homeTeam,
@@ -53,6 +55,7 @@ function Calendar() {
   const handleDateClick = (info) => {
     setFormData({
       location: "",
+      field: "",
       typeOfMatch: "",
       rating: "",
       dateTime: info.dateStr + "T12:00",
@@ -68,6 +71,7 @@ function Calendar() {
 
     const dataToSend = {
       location: formData.location,
+      field: formData.field,
       typeOfMatch: formData.typeOfMatch,
       dateTime: formData.dateTime,
       homeTeam: { name: formData.homeTeam },
@@ -95,11 +99,12 @@ function Calendar() {
     setSelectedEvent(event);
     setFormData({
       location: event.extendedProps.location,
+      field: event.extendedProps.field || "",
       typeOfMatch: event.extendedProps.typeOfMatch,
       rating: event.extendedProps.rating || "",
       dateTime: event.startStr.slice(0, 16),
-      homeTeam: event.extendedProps.homeTeam?.name || "",
-      awayTeam: event.extendedProps.awayTeam?.name || "",
+      homeTeam: event.extendedProps.homeTeam?.teamName || event.extendedProps.homeTeam?.name || "",
+      awayTeam: event.extendedProps.awayTeam?.teamName || event.extendedProps.awayTeam?.name || "",
     });
     setEditModalOpen(true);
   };
@@ -110,6 +115,7 @@ function Calendar() {
 
     const dataToSend = {
       location: formData.location,
+      field: formData.field,
       typeOfMatch: formData.typeOfMatch,
       dateTime: formData.dateTime,
       homeTeam: { name: formData.homeTeam },
@@ -190,6 +196,16 @@ function Calendar() {
                 />
               </label>
               <label>
+                Field:
+                <input
+                  type="text"
+                  value={formData.field}
+                  onChange={(e) =>
+                    setFormData({ ...formData, field: e.target.value })
+                  }
+                />
+              </label>
+              <label>
                 Type of Match:
                 <input
                   type="text"
@@ -259,6 +275,16 @@ function Calendar() {
                     setFormData({ ...formData, location: e.target.value })
                   }
                   required
+                />
+              </label>
+              <label>
+                Field:
+                <input
+                  type="text"
+                  value={formData.field}
+                  onChange={(e) =>
+                    setFormData({ ...formData, field: e.target.value })
+                  }
                 />
               </label>
               <label>
