@@ -1,43 +1,37 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const TeamSchema = new mongoose.Schema({
-    teamName: String,
-    wins: Number,
-    losses: Number
+    teamName: { type: String, required: true },
+    teamLogo: { type: String, default: "" },
+    manager: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+    players: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 });
 
-const TeamModel = mongoose.model('Team', TeamSchema);
+const TeamModel = mongoose.model("Team", TeamSchema);
 
-exports.createTeam = async function(TeamData){
-    let Team = new TeamModel(TeamData);
-    await Team.save();
-    return Team;
-}
+module.exports = {
+    createTeam: async (data) => {
+        const team = new TeamModel(data);
+        return await team.save();
+    },
 
-exports.getAllTeams = async function(){
-    let lstTeams = await TeamModel.find();
-    return lstTeams;
-}
+    getAllTeams: async () => {
+        return await TeamModel.find().populate("players");
+    },
 
-exports.readOneTeam = async function(id){
-    let Team = await TeamModel.findById(id);
-    return Team;
-}
+    readOneTeam: async (id) => {
+        return await TeamModel.findById(id).populate("players");
+    },
 
-exports.updateTeam = async function(id, TeamData){
-    let Team = await TeamModel.findById(id);
-    if(!Team) return null;
-    Team.teamName = TeamData.teamName;
-    Team.wins = TeamData.wins;
-    Team.losses = TeamData.loses;
-    await Team.save();
-    return Team;
-}
+    updateTeam: async (id, data) => {
+        return await TeamModel.findByIdAndUpdate(id, data, { new: true });
+    },
 
-exports.deleteTeam = async function(id){
-    await TeamModel.findByIdAndDelete(id);
-}
+    deleteTeam: async (id) => {
+        await TeamModel.findByIdAndDelete(id);
+    },
 
-exports.deleteAll = async function name(){
-    await TeamModel.deleteMany();
-} 
+    deleteAll: async () => {
+        await TeamModel.deleteMany();
+    }
+};

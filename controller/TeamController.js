@@ -1,49 +1,52 @@
-const dao = require('../model/TeamDao');     
+// controllers/TeamController.js
+const dao = require('../model/TeamDao');
 
-// Create a new Team 
-exports.createTeam = async function(req, res) {
+// Create a new Team
+exports.createTeam = async function (req, res) {
   try {
-    let newTeam = {};
-    newTeam.teamName = req.body.teamName;
-    newTeam.wins = req.body.wins;
-    newTeam.losses = req.body.losses;
+    let newTeam = {
+      teamName: req.body.teamName,
+      wins: req.body.wins,
+      losses: req.body.losses,
+      logo: req.body.logo || ""   // (file upload supported later)
+    };
 
     const savedTeam = await dao.createTeam(newTeam);
-    res.status(201).json(savedTeam); // Return the saved Team as JSON
+    res.status(201).json(savedTeam);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Error creating Team" });
   }
 };
 
-
-// Get all Teams 
-exports.getAllTeams = async function(req, res) {
+// Get all Teams
+exports.getAllTeams = async function (req, res) {
   try {
-    const Teams = await dao.getAllTeams();
-    res.status(200).json(Teams); // Send list to FullCalendar
+    const teams = await dao.getAllTeams();
+    res.status(200).json(teams);
   } catch (err) {
     res.status(500).json({ message: "Error retrieving Teams" });
   }
 };
 
-// Get one Team by ID 
-exports.getTeam = async function(req, res) {
+// Get one Team by ID
+exports.getTeam = async function (req, res) {
   try {
-    const Team = await dao.readOneTeam(req.params.id);
-    if (!Team) {
+    const team = await dao.readOneTeam(req.params.id);
+    if (!team) {
       return res.status(404).json({ message: "Team not found" });
     }
-    res.status(200).json(Team);
+    res.status(200).json(team);
   } catch (err) {
     res.status(500).json({ message: "Error retrieving Team" });
   }
 };
 
-// Update Team 
-exports.updateTeam = async function(req, res) {
+// Update Team
+exports.updateTeam = async function (req, res) {
   try {
     const updatedTeam = await dao.updateTeam(req.params.id, req.body);
+
     if (!updatedTeam) {
       return res.status(404).json({ message: "Team not found" });
     }
@@ -53,11 +56,11 @@ exports.updateTeam = async function(req, res) {
   }
 };
 
-// Delete one Team 
-exports.deleteTeam = async function(req, res) {
+// Delete Team
+exports.deleteTeam = async function (req, res) {
   try {
     await dao.deleteTeam(req.params.id);
-    res.status(204).end(); // no content
+    res.status(204).end();
   } catch (err) {
     res.status(500).json({ message: "Error deleting Team" });
   }
