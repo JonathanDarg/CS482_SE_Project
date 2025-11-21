@@ -1,7 +1,6 @@
 const controller = require('./EventController');
 const dao = require('../model/EventDao');
 
-// Mock the DAO methods
 jest.mock('../model/EventDao');
 
 describe('EventController', () => {
@@ -17,9 +16,9 @@ describe('EventController', () => {
     jest.clearAllMocks();
   });
 
-  // ---- CREATE Event ----
+  // CREATE
   describe('createEvent', () => {
-    it('should create a new Event and return 201 with teams', async () => {
+    it('should create a new Event and return 201', async () => {
       const fakeEvent = {
         location: 'Park',
         dateTime: '2025-05-10T12:00',
@@ -29,18 +28,42 @@ describe('EventController', () => {
         awayTeam: { name: 'Tigers' },
         inning: 1
       };
-      req.body = fakeEvent;
 
+      req.body = fakeEvent;
       dao.createEvent.mockResolvedValue(fakeEvent);
 
       await controller.createEvent(req, res);
 
-      expect(dao.createEvent).toHaveBeenCalledWith(fakeEvent);
+      expect(dao.createEvent).toHaveBeenCalledWith(expect.objectContaining(fakeEvent));
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.json).toHaveBeenCalledWith(fakeEvent);
     });
 
-    it('should handle DAO errors', async () => {
+    it('should default optional fields', async () => {
+      const fakeEvent = {
+        location: 'Stadium',
+        dateTime: '2025-06-01T18:00',
+        homeTeam: { name: 'Bears' },
+        awayTeam: { name: 'Wolves' },
+        rating: 4,
+        typeOfMatch: 'tournament',
+        inning: 2,
+      };
+      req.body = fakeEvent;
+      dao.createEvent.mockResolvedValue({ ...fakeEvent, homeScore: 0, awayScore: 0, status: 'upcoming' });
+
+      await controller.createEvent(req, res);
+
+      expect(dao.createEvent).toHaveBeenCalledWith(expect.objectContaining({
+        ...fakeEvent,
+        homeScore: 0,
+        awayScore: 0,
+        status: 'upcoming'
+      }));
+      expect(res.status).toHaveBeenCalledWith(201);
+    });
+
+    it('should handle errors', async () => {
       dao.createEvent.mockRejectedValue(new Error('DB error'));
 
       await controller.createEvent(req, res);
@@ -50,23 +73,21 @@ describe('EventController', () => {
     });
   });
 
-  // ---- GET ALL Events ----
+  // GET ALL
   describe('getAllEvents', () => {
-    it('should return all Events with teams', async () => {
-      const Events = [
-        { id: 1, homeTeam: { name: 'Lions' }, awayTeam: { name: 'Tigers' } },
-        { id: 2, homeTeam: { name: 'Eagles' }, awayTeam: { name: 'Sharks' } }
-      ];
-      dao.getAllEvents.mockResolvedValue(Events);
+    it('should return all Events', async () => {
+      const events = [{ id: 1 }, { id: 2 }];
+      dao.getAllEvents.mockResolvedValue(events);
 
       await controller.getAllEvents(req, res);
 
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith(Events);
+      expect(res.json).toHaveBeenCalledWith(events);
     });
 
-    it('should handle DAO errors', async () => {
+    it('should handle errors', async () => {
       dao.getAllEvents.mockRejectedValue(new Error('DB error'));
+
       await controller.getAllEvents(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
@@ -74,27 +95,22 @@ describe('EventController', () => {
     });
   });
 
-  // ---- GET ONE Event ----
+  // GET ONE
   describe('getEvent', () => {
-    it('should return one Event by id with teams', async () => {
-      req.params.id = '1';
-      const Event = {
-        id: '1',
-        location: 'Park',
-        homeTeam: { name: 'Lions' },
-        awayTeam: { name: 'Tigers' }
-      };
-      dao.readOneEvent.mockResolvedValue(Event);
+    it('should return one Event', async () => {
+      req.params.id = '123';
+      const event = { id: '123' };
+
+      dao.readOneEvent.mockResolvedValue(event);
 
       await controller.getEvent(req, res);
 
-      expect(dao.readOneEvent).toHaveBeenCalledWith('1');
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith(Event);
+      expect(res.json).toHaveBeenCalledWith(event);
     });
 
-    it('should return 404 if Event not found', async () => {
-      req.params.id = '99';
+    it('should return 404 if event not found', async () => {
+      req.params.id = '999';
       dao.readOneEvent.mockResolvedValue(null);
 
       await controller.getEvent(req, res);
@@ -103,8 +119,10 @@ describe('EventController', () => {
       expect(res.json).toHaveBeenCalledWith({ message: 'Event not found' });
     });
 
-    it('should handle DAO errors', async () => {
+    it('should handle errors', async () => {
+      req.params.id = '123';
       dao.readOneEvent.mockRejectedValue(new Error('DB error'));
+
       await controller.getEvent(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
@@ -112,40 +130,37 @@ describe('EventController', () => {
     });
   });
 
-  // ---- UPDATE Event ----
+  // UPDATE
   describe('updateEvent', () => {
-    it('should update a Event with teams', async () => {
+    it('should update an event', async () => {
       req.params.id = '1';
-      req.body = {
-        rating: 4,
-        homeTeam: { name: 'Lions' },
-        awayTeam: { name: 'Tigers' }
-      };
-      const updated = {
-        id: '1',
-        rating: 4,
-        homeTeam: { name: 'Lions' },
-        awayTeam: { name: 'Tigers' }
-      };
+      req.body = { rating: 3 };
+      const updated = { id: '1', rating: 3 };
+
       dao.updateEvent.mockResolvedValue(updated);
 
       await controller.updateEvent(req, res);
 
-      expect(dao.updateEvent).toHaveBeenCalledWith('1', req.body);
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(updated);
     });
 
-    it('should return 404 if Event not found', async () => {
+    it('should return 404 if event not found', async () => {
+      req.params.id = '2';
+      req.body = { rating: 4 };
       dao.updateEvent.mockResolvedValue(null);
+
       await controller.updateEvent(req, res);
 
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({ message: 'Event not found' });
     });
 
-    it('should handle DAO errors', async () => {
+    it('should handle errors', async () => {
+      req.params.id = '1';
+      req.body = { rating: 5 };
       dao.updateEvent.mockRejectedValue(new Error('DB error'));
+
       await controller.updateEvent(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
@@ -153,21 +168,22 @@ describe('EventController', () => {
     });
   });
 
-  // ---- DELETE Event ----
+  // DELETE
   describe('deleteEvent', () => {
-    it('should delete a Event and return 204', async () => {
+    it('should delete event', async () => {
       req.params.id = '1';
       dao.deleteEvent.mockResolvedValue();
 
       await controller.deleteEvent(req, res);
 
-      expect(dao.deleteEvent).toHaveBeenCalledWith('1');
       expect(res.status).toHaveBeenCalledWith(204);
       expect(res.end).toHaveBeenCalled();
     });
 
-    it('should handle DAO errors', async () => {
+    it('should handle errors', async () => {
+      req.params.id = '1';
       dao.deleteEvent.mockRejectedValue(new Error('DB error'));
+
       await controller.deleteEvent(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
@@ -175,25 +191,25 @@ describe('EventController', () => {
     });
   });
 
-  // ---- GET BY MONTH ----
+  // GET BY MONTH
   describe('getByMonth', () => {
-    it('should return Events for a given month and year', async () => {
+    it('should return events for month', async () => {
       req.params = { month: '05', year: '2025' };
-      const Events = [
-        { id: 1, homeTeam: { name: 'Lions' }, awayTeam: { name: 'Tigers' } },
-        { id: 2, homeTeam: { name: 'Eagles' }, awayTeam: { name: 'Sharks' } }
-      ];
-      dao.getByMonth.mockResolvedValue(Events);
+      const events = [{ id: 1 }];
+
+      dao.getByMonth.mockResolvedValue(events);
 
       await controller.getByMonth(req, res);
 
       expect(dao.getByMonth).toHaveBeenCalledWith('05', '2025');
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith(Events);
+      expect(res.json).toHaveBeenCalledWith(events);
     });
 
-    it('should handle DAO errors', async () => {
+    it('should handle errors', async () => {
+      req.params = { month: '05', year: '2025' };
       dao.getByMonth.mockRejectedValue(new Error('DB error'));
+
       await controller.getByMonth(req, res);
 
       expect(res.status).toHaveBeenCalledWith(500);

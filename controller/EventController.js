@@ -1,16 +1,24 @@
 const dao = require('../model/EventDao');
 
-// Create a new Event 
-exports.createEvent = async function(req, res) {
+// Create a new Event
+exports.createEvent = async function (req, res) {
   try {
     let newEvent = {
       location: req.body.location,
+      field: req.body.field,
       dateTime: req.body.dateTime,
+
       homeTeam: req.body.homeTeam,
       awayTeam: req.body.awayTeam,
+
+      homeScore: req.body.homeScore ?? 0,
+      awayScore: req.body.awayScore ?? 0,
+      status: req.body.status ?? "upcoming",
+
       rating: req.body.rating,
       typeOfMatch: req.body.typeOfMatch,
-      inning: req.body.inning
+      inning: req.body.inning,
+      season: req.body.season
     };
 
     const savedEvent = await dao.createEvent(newEvent);
@@ -21,9 +29,8 @@ exports.createEvent = async function(req, res) {
   }
 };
 
-
-// Get all Events 
-exports.getAllEvents = async function(req, res) {
+// Get all Events
+exports.getAllEvents = async function (req, res) {
   try {
     const events = await dao.getAllEvents();
     res.status(200).json(events);
@@ -32,8 +39,8 @@ exports.getAllEvents = async function(req, res) {
   }
 };
 
-// Get one Event by ID 
-exports.getEvent = async function(req, res) {
+// Get one Event by ID
+exports.getEvent = async function (req, res) {
   try {
     const event = await dao.readOneEvent(req.params.id);
     if (!event) {
@@ -45,8 +52,8 @@ exports.getEvent = async function(req, res) {
   }
 };
 
-// Update Event 
-exports.updateEvent = async function(req, res) {
+// Update Event
+exports.updateEvent = async function (req, res) {
   try {
     const updatedEvent = await dao.updateEvent(req.params.id, req.body);
     if (!updatedEvent) {
@@ -58,8 +65,8 @@ exports.updateEvent = async function(req, res) {
   }
 };
 
-// Delete one Event 
-exports.deleteEvent = async function(req, res) {
+// Delete Event
+exports.deleteEvent = async function (req, res) {
   try {
     await dao.deleteEvent(req.params.id);
     res.status(204).end();
@@ -68,8 +75,8 @@ exports.deleteEvent = async function(req, res) {
   }
 };
 
-// Get Events by month 
-exports.getByMonth = async function(req, res) {
+// Get Events by month
+exports.getByMonth = async function (req, res) {
   try {
     const { month, year } = req.params;
     const events = await dao.getByMonth(month, year);

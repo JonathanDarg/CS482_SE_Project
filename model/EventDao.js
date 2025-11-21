@@ -1,71 +1,76 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const EventSchema = new mongoose.Schema({
-    location: String,
-    dateTime: {type: Date, default: Date.now},
-    homeTeam: Object,
-    awayTeam: Object,
-    rating: Number,
-    typeOfMatch: String,
-    inning: Number
+    dateTime: { type: Date, default: Date.now },
+    // allow either an ObjectId ref to Team or an embedded team object 
+    homeTeam: { type: mongoose.Schema.Types.Mixed, required: true },
+    awayTeam: { type: mongoose.Schema.Types.Mixed, required: true },
+    homeScore: { type: Number, default: 0 },
+    awayScore: { type: Number, default: 0 },
+    status: { type: String, enum: ["upcoming", "completed"], default: "upcoming" },
+    location: { type: String, default: "" },
+    field: { type: String, default: "" },
+    typeOfMatch: { type: String, default: "Season" },
+    inning: { type: Number, default: 0 },
+    season: { type: String, default: "2025" },
+    rating: { type: Number, default: 0 }
 });
 
-const EventModel = mongoose.model('Event', EventSchema);
+const EventModel = mongoose.model("Event", EventSchema);
 
-exports.createEvent = async function(EventData){
-    let Event = new EventModel(EventData);
-    await Event.save();
-    return Event;
-}
 
-exports.getAllEvents = async function(){
-    let lstEvents = await EventModel.find();
-    return lstEvents;
-}
+module.exports = {
+    createEvent: async (data) => {
+        const event = new EventModel(data);
+        return await event.save();
+    },
 
-exports.readOneEvent = async function(id){
-    let Event = await EventModel.findById(id);
-    return Event;
-}
+    getAllEvents: async () => {
+        return await EventModel.find()
+            // populate only attempts will be ignored if homeTeam/awayTeam are embedded objects
+            .populate("homeTeam")
+            .populate("awayTeam")
+            .sort({ dateTime: 1 });
+    },
 
-exports.getByMonth = async function(month, year){
-    let startDate = new Date(year, month - 1, 1);
-    let endDate = new Date(year, month, 1);
+    readOneEvent: async (id) => {
+        return await EventModel.findById(id)
+            .populate("homeTeam")
+            .populate("awayTeam");
+    },
 
-    let Events = await EventModel.find({
-        dateTime: {
-            $gte: startDate,
-            $lt: endDate
-        }
-    });
+    getByMonth: async (month, year) => {
+        const start = new Date(year, month - 1, 1);
+        const end = new Date(year, month, 1);
 
-    return Events;
-}
+        return await EventModel.find({
+            dateTime: { $gte: start, $lt: end }
+        })
+        .populate("homeTeam")
+        .populate("awayTeam")
+        .sort({ dateTime: 1 });
+    },
 
-exports.updateEvent = async function(id, EventData){
-    let Event = await EventModel.findById(id);
-    if(!Event) return null;
-    Event.location = EventData.location;
-    Event.dateTime = EventData.dateTime;
-    Event.homeTeam = EventData.homeTeam;
-    Event.awayTeam = EventData.awayTeam;
-    Event.rating = EventData.rating;
-    Event.typeOfMatch = EventData.typeOfMatch;
-    Event.inning = EventData.inning;
-    await Event.save();
-    return Event;
-}
+    updateEvent: async (id, data) => {
+        return await EventModel.findByIdAndUpdate(id, data, {
+            new: true
+        });
+    },
 
-exports.deleteEvent = async function(id){
-    await EventModel.findByIdAndDelete(id);
-}
+    deleteEvent: async (id) => {
+        return await EventModel.findByIdAndDelete(id);
+    },
 
-exports.deleteAll = async function(){
-    await EventModel.deleteMany();
-}
+    deleteAll: async () => {
+        return await EventModel.deleteMany();
+    },
 
-exports.getNextEvent = async function(){
-    let now = new Date();
-    let Event = await EventModel.findOne({dateTime: {$gte: now}}).sort({dateTime: 1});
-    return Event;
-}
+    getNextEvent: async () => {
+        return await EventModel.findOne({
+            dateTime: { $gte: new Date() }
+        })
+        .populate("homeTeam")
+        .populate("awayTeam")
+        .sort({ dateTime: 1 });
+    }
+};
