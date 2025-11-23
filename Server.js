@@ -10,7 +10,7 @@ db.connect(); // Connect to MongoDB
 const authController = require("./controller/AuthController");
 const eventController = require("./controller/EventController");
 const imageController = require("./controller/ImageController");
-const teamController = require("./controller/teamController");
+const teamController = require("./controller/TeamController");
 
 // Models
 const User = require("./model/User");
@@ -68,6 +68,9 @@ app.delete("/api/images/:id", imageController.deleteImage);
 // Team routes
 app.get("/api/teams", teamController.getAllTeams);
 app.get("/api/teams/:id", teamController.getTeam);
+app.post("/api/teams", teamController.createTeam);
+app.put("/api/teams/:id", teamController.updateTeam);
+app.delete("/api/teams/:id", teamController.deleteTeam);
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

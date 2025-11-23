@@ -1,37 +1,36 @@
 const mongoose = require("mongoose");
 
 const TeamSchema = new mongoose.Schema({
-    teamName: { type: String, required: true },
-    teamLogo: { type: String, default: "" },
-    manager: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
-    players: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  teamName: { type: String, required: true },
+  manager: { type: String, default: "" },
+  players: [{ type: String }]
 });
 
 const TeamModel = mongoose.model("Team", TeamSchema);
 
 module.exports = {
-    createTeam: async (data) => {
-        const team = new TeamModel(data);
-        return await team.save();
-    },
+  createTeam: async (data) => {
+    const team = new TeamModel(data);
+    return await team.save();
+  },
 
-    getAllTeams: async () => {
-        return await TeamModel.find().populate("players");
-    },
+  getAllTeams: async () => {
+    return await TeamModel.find();
+  },
 
-    readOneTeam: async (id) => {
-        return await TeamModel.findById(id).populate("players");
-    },
+  readOneTeam: async (id) => {
+    return await TeamModel.findById(id);
+  },
 
-    updateTeam: async (id, data) => {
-        return await TeamModel.findByIdAndUpdate(id, data, { new: true });
-    },
+  updateTeam: async (id, data) => {
+    return await TeamModel.findByIdAndUpdate(id, data, { new: true });
+  },
 
-    deleteTeam: async (id) => {
-        await TeamModel.findByIdAndDelete(id);
-    },
+  deleteTeam: async (id) => {
+    return await TeamModel.findByIdAndDelete(id);
+  },
 
-    deleteAll: async () => {
-        await TeamModel.deleteMany();
-    }
+  deleteAll: async () => {
+    return await TeamModel.deleteMany();
+  }
 };
