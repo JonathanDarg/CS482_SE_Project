@@ -1,7 +1,9 @@
 const controller = require('./TeamController');
 const dao = require('../model/TeamDao');
+const User = require('../model/User');
 
 jest.mock('../model/TeamDao');
+jest.mock('../model/User');
 
 describe('TeamController', () => {
   let req, res;
@@ -14,90 +16,148 @@ describe('TeamController', () => {
       end: jest.fn(),
     };
     jest.clearAllMocks();
+
+    // Suppress console.error in tests
     jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   // createTeam
   describe('createTeam', () => {
-    it('creates a new team (array players, no trimming)', async () => {
-      req.body = {
-        teamName: 'Lions',
-        manager: 'Coach Z',
-        players: ['  Tom ', ' Jerry', '', '  '],
+    it('should create a new team with ObjectId references', async () => {
+      const teamData = { 
+        teamName: 'Lions', 
+        manager: '507f1f77bcf86cd799439011',
+        players: ['507f1f77bcf86cd799439012', '507f1f77bcf86cd799439013']
       };
+      const savedTeam = { ...teamData, _id: '123' };
 
-      const expectedTeam = {
-        teamName: 'Lions',
-        manager: 'Coach Z',
-        players: ['  Tom ', ' Jerry', '', '  ']
-      };
-
-      dao.createTeam.mockResolvedValue({ ...expectedTeam, _id: '123' });
+      req.body = teamData;
+      dao.createTeam.mockResolvedValue(savedTeam);
 
       await controller.createTeam(req, res);
 
-      expect(dao.createTeam).toHaveBeenCalledWith(expectedTeam);
+      expect(dao.createTeam).toHaveBeenCalledWith({
+        teamName: 'Lions',
+        manager: '507f1f77bcf86cd799439011',
+        players: ['507f1f77bcf86cd799439012', '507f1f77bcf86cd799439013']
+      });
       expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.json).toHaveBeenCalledWith({ ...expectedTeam, _id: '123' });
+      expect(res.json).toHaveBeenCalledWith(savedTeam);
     });
 
-    it('accepts a single string for players', async () => {
-      req.body = {
-        teamName: 'Sharks',
-        manager: 'Coach X',
-        players: ' Sam '
+    it('should handle empty players array', async () => {
+      const teamData = { 
+        teamName: 'Tigers', 
+        manager: '507f1f77bcf86cd799439011'
+      };
+      const savedTeam = { 
+        teamName: 'Tigers', 
+        manager: '507f1f77bcf86cd799439011',
+        players: [],
+        _id: '456' 
       };
 
-      const expectedTeam = {
-        teamName: 'Sharks',
-        manager: 'Coach X',
-        players: [' Sam ']
-      };
-
-      dao.createTeam.mockResolvedValue({ ...expectedTeam, _id: '222' });
+      req.body = teamData;
+      dao.createTeam.mockResolvedValue(savedTeam);
 
       await controller.createTeam(req, res);
 
-      expect(dao.createTeam).toHaveBeenCalledWith(expectedTeam);
+      expect(dao.createTeam).toHaveBeenCalledWith({
+        teamName: 'Tigers',
+        manager: '507f1f77bcf86cd799439011',
+        players: []
+      });
       expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.json).toHaveBeenCalledWith({ ...expectedTeam, _id: '222' });
+      expect(res.json).toHaveBeenCalledWith(savedTeam);
     });
 
-    it('uses empty string for missing manager', async () => {
-      req.body = {
-        teamName: 'Lions',
-        players: ['Amy'],
+    it('should handle missing manager field as null', async () => {
+      const teamData = { 
+        teamName: 'Bears',
+        players: ['507f1f77bcf86cd799439012']
+      };
+      const savedTeam = { 
+        teamName: 'Bears',
+        manager: null,
+        players: ['507f1f77bcf86cd799439012'],
+        _id: '789'
       };
 
-      const expectedTeam = {
-        teamName: 'Lions',
-        manager: '',
-        players: ['Amy']
-      };
-
-      dao.createTeam.mockResolvedValue({ ...expectedTeam, _id: '555' });
+      req.body = teamData;
+      dao.createTeam.mockResolvedValue(savedTeam);
 
       await controller.createTeam(req, res);
 
-      expect(dao.createTeam).toHaveBeenCalledWith(expectedTeam);
+      expect(dao.createTeam).toHaveBeenCalledWith({
+        teamName: 'Bears',
+        manager: null,
+        players: ['507f1f77bcf86cd799439012']
+      });
       expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.json).toHaveBeenCalledWith({ ...expectedTeam, _id: '555' });
+      expect(console.error).not.toHaveBeenCalled();
     });
 
-    it('handles errors', async () => {
-      dao.createTeam.mockRejectedValue(new Error('DB error'));
+    it('should normalize single string player to array', async () => {
+      const teamData = { 
+        teamName: 'Hawks',
+        manager: null,
+        players: '507f1f77bcf86cd799439012'
+      };
+      const savedTeam = { 
+        teamName: 'Hawks',
+        manager: null,
+        players: ['507f1f77bcf86cd799439012'],
+        _id: '999'
+      };
+
+      req.body = teamData;
+      dao.createTeam.mockResolvedValue(savedTeam);
 
       await controller.createTeam(req, res);
 
+      expect(dao.createTeam).toHaveBeenCalledWith({
+        teamName: 'Hawks',
+        manager: null,
+        players: ['507f1f77bcf86cd799439012']
+      });
+      expect(res.status).toHaveBeenCalledWith(201);
+    });
+
+    it('should handle errors and log them', async () => {
+      req.body = { teamName: 'Lions' };
+      const error = new Error('DB error');
+      dao.createTeam.mockRejectedValue(error);
+
+      await controller.createTeam(req, res);
+
+      expect(console.error).toHaveBeenCalledWith(error);
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({ message: 'Error creating team' });
     });
   });
 
-  // getAllTeams
+  // get all teams
   describe('getAllTeams', () => {
-    it('returns all teams', async () => {
-      const teams = [{ teamName: 'Lions' }];
+    it('should return all teams with populated data', async () => {
+      const teams = [
+        { 
+          teamName: 'Lions', 
+          manager: { _id: '1', name: 'John', email: 'john@test.com' }, 
+          players: [
+            { _id: '2', name: 'P1', email: 'p1@test.com' },
+            { _id: '3', name: 'P2', email: 'p2@test.com' }
+          ]
+        },
+        { 
+          teamName: 'Tigers', 
+          manager: { _id: '4', name: 'Jane', email: 'jane@test.com' }, 
+          players: []
+        }
+      ];
       dao.getAllTeams.mockResolvedValue(teams);
 
       await controller.getAllTeams(req, res);
@@ -105,23 +165,33 @@ describe('TeamController', () => {
       expect(dao.getAllTeams).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(teams);
+      expect(console.error).not.toHaveBeenCalled();
     });
 
-    it('handles errors', async () => {
-      dao.getAllTeams.mockRejectedValue(new Error('DB error'));
+    it('should handle errors and log them', async () => {
+      const error = new Error('DB error');
+      dao.getAllTeams.mockRejectedValue(error);
 
       await controller.getAllTeams(req, res);
 
+      expect(console.error).toHaveBeenCalledWith(error);
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({ message: 'Error retrieving teams' });
     });
   });
 
-  // getTeam
+  // get one team
   describe('getTeam', () => {
-    it('returns a team', async () => {
+    it('should return one team with populated data', async () => {
       req.params.id = '123';
-      const team = { _id: '123', teamName: 'Lions' };
+      const team = { 
+        _id: '123', 
+        teamName: 'Lions',
+        manager: { _id: '1', name: 'John', email: 'john@test.com' },
+        players: [
+          { _id: '2', name: 'P1', email: 'p1@test.com' }
+        ]
+      };
       dao.readOneTeam.mockResolvedValue(team);
 
       await controller.getTeam(req, res);
@@ -129,9 +199,10 @@ describe('TeamController', () => {
       expect(dao.readOneTeam).toHaveBeenCalledWith('123');
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(team);
+      expect(console.error).not.toHaveBeenCalled();
     });
 
-    it('returns 404 when team not found', async () => {
+    it('should return 404 if team not found', async () => {
       req.params.id = '999';
       dao.readOneTeam.mockResolvedValue(null);
 
@@ -139,113 +210,110 @@ describe('TeamController', () => {
 
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({ message: 'Team not found' });
+      expect(console.error).not.toHaveBeenCalled();
     });
 
-    it('handles errors', async () => {
+    it('should handle errors and log them', async () => {
       req.params.id = '123';
-      dao.readOneTeam.mockRejectedValue(new Error('DB error'));
+      const error = new Error('DB error');
+      dao.readOneTeam.mockRejectedValue(error);
 
       await controller.getTeam(req, res);
 
+      expect(console.error).toHaveBeenCalledWith(error);
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({ message: 'Error retrieving team' });
     });
   });
 
-  // updateTeam
+  // update team
   describe('updateTeam', () => {
-    it('updates a team (array players, no trimming)', async () => {
+    it('should update a team', async () => {
       req.params.id = '1';
-      req.body = {
+      req.body = { 
         teamName: 'Lions Updated',
-        manager: 'Coach B',
-        players: ['  Mike', '', 'Sue ']
+        manager: '507f1f77bcf86cd799439011',
+        players: ['507f1f77bcf86cd799439012', '507f1f77bcf86cd799439013']
       };
-
-      const expectedUpdate = {
+      const updatedTeam = { 
+        _id: '1', 
         teamName: 'Lions Updated',
-        manager: 'Coach B',
-        players: ['  Mike', '', 'Sue ']
+        manager: { _id: '507f1f77bcf86cd799439011', name: 'John' },
+        players: [
+          { _id: '507f1f77bcf86cd799439012', name: 'P1' },
+          { _id: '507f1f77bcf86cd799439013', name: 'P2' }
+        ]
       };
 
-      dao.updateTeam.mockResolvedValue({ _id: '1', ...expectedUpdate });
+      dao.updateTeam.mockResolvedValue(updatedTeam);
 
       await controller.updateTeam(req, res);
 
-      expect(dao.updateTeam).toHaveBeenCalledWith('1', expectedUpdate);
+      expect(dao.updateTeam).toHaveBeenCalledWith('1', {
+        teamName: 'Lions Updated',
+        manager: '507f1f77bcf86cd799439011',
+        players: ['507f1f77bcf86cd799439012', '507f1f77bcf86cd799439013']
+      });
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({ _id: '1', ...expectedUpdate });
+      expect(res.json).toHaveBeenCalledWith(updatedTeam);
+      expect(console.error).not.toHaveBeenCalled();
     });
 
-    it('accepts single-string players on update', async () => {
+    it('should handle null manager', async () => {
       req.params.id = '1';
-      req.body = {
-        teamName: 'Updated',
-        manager: 'Coach X',
-        players: ' Sam '
+      req.body = { 
+        teamName: 'Wolves',
+        players: ['507f1f77bcf86cd799439012']
+      };
+      const updatedTeam = { 
+        _id: '1', 
+        teamName: 'Wolves',
+        manager: null,
+        players: [{ _id: '507f1f77bcf86cd799439012', name: 'P1' }]
       };
 
-      const expectedUpdate = {
-        teamName: 'Updated',
-        manager: 'Coach X',
-        players: [' Sam ']
-      };
-
-      dao.updateTeam.mockResolvedValue({ _id: '1', ...expectedUpdate });
+      dao.updateTeam.mockResolvedValue(updatedTeam);
 
       await controller.updateTeam(req, res);
 
-      expect(dao.updateTeam).toHaveBeenCalledWith('1', expectedUpdate);
+      expect(dao.updateTeam).toHaveBeenCalledWith('1', {
+        teamName: 'Wolves',
+        manager: null,
+        players: ['507f1f77bcf86cd799439012']
+      });
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({ _id: '1', ...expectedUpdate });
+      expect(res.json).toHaveBeenCalledWith(updatedTeam);
     });
 
-    it('uses empty string for missing manager', async () => {
-      req.params.id = '1';
-      req.body = {
-        teamName: 'Updated',
-        players: [' Bob '],
-      };
-
-      const expectedUpdate = {
-        teamName: 'Updated',
-        manager: '',
-        players: [' Bob ']
-      };
-
-      dao.updateTeam.mockResolvedValue({ _id: '1', ...expectedUpdate });
-
-      await controller.updateTeam(req, res);
-
-      expect(dao.updateTeam).toHaveBeenCalledWith('1', expectedUpdate);
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({ _id: '1', ...expectedUpdate });
-    });
-
-    it('returns 404 if not found', async () => {
+    it('should return 404 if team not found', async () => {
       req.params.id = '2';
+      req.body = { teamName: 'Tigers' };
       dao.updateTeam.mockResolvedValue(null);
 
       await controller.updateTeam(req, res);
 
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({ message: 'Team not found' });
+      expect(console.error).not.toHaveBeenCalled();
     });
 
-    it('handles errors', async () => {
+    it('should handle errors and log them', async () => {
       req.params.id = '1';
-      dao.updateTeam.mockRejectedValue(new Error('DB error'));
+      req.body = { teamName: 'Lions' };
+      const error = new Error('DB error');
+      dao.updateTeam.mockRejectedValue(error);
 
       await controller.updateTeam(req, res);
 
+      expect(console.error).toHaveBeenCalledWith(error);
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({ message: 'Error updating team' });
     });
   });
 
-  // deleteTeam
+  // delete team
   describe('deleteTeam', () => {
-    it('deletes a team', async () => {
+    it('should delete a team', async () => {
       req.params.id = '1';
       dao.deleteTeam.mockResolvedValue();
 
@@ -254,16 +322,114 @@ describe('TeamController', () => {
       expect(dao.deleteTeam).toHaveBeenCalledWith('1');
       expect(res.status).toHaveBeenCalledWith(204);
       expect(res.end).toHaveBeenCalled();
+      expect(console.error).not.toHaveBeenCalled();
     });
 
-    it('handles errors', async () => {
+    it('should handle errors and log them', async () => {
       req.params.id = '1';
-      dao.deleteTeam.mockRejectedValue(new Error('DB error'));
+      const error = new Error('DB error');
+      dao.deleteTeam.mockRejectedValue(error);
 
       await controller.deleteTeam(req, res);
 
+      expect(console.error).toHaveBeenCalledWith(error);
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({ message: 'Error deleting team' });
+    });
+  });
+
+  // getChildren
+  describe('getChildren', () => {
+    it('should return all children with parent info', async () => {
+      const children = [
+        { 
+          _id: '1', 
+          name: 'Child 1', 
+          email: 'child1@test.com',
+          parentId: { _id: 'parent1', name: 'Parent 1', email: 'parent1@test.com' },
+          isActive: true
+        },
+        { 
+          _id: '2', 
+          name: 'Child 2', 
+          email: 'child2@test.com',
+          parentId: { _id: 'parent2', name: 'Parent 2', email: 'parent2@test.com' },
+          isActive: true
+        }
+      ];
+
+      User.find.mockReturnValue({
+        populate: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockResolvedValue(children)
+      });
+
+      await controller.getChildren(req, res);
+
+      expect(User.find).toHaveBeenCalledWith({ role: 'child' });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith(children);
+      expect(console.error).not.toHaveBeenCalled();
+    });
+
+    it('should handle errors and log them', async () => {
+      const error = new Error('DB error');
+      User.find.mockReturnValue({
+        populate: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockRejectedValue(error)
+      });
+
+      await controller.getChildren(req, res);
+
+      expect(console.error).toHaveBeenCalledWith(error);
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({ message: 'Error retrieving children' });
+    });
+  });
+
+  // getChildrenByParent
+  describe('getChildrenByParent', () => {
+    it('should return children for specific parent', async () => {
+      req.params.parentId = 'parent123';
+      const children = [
+        { 
+          _id: '1', 
+          name: 'Child 1', 
+          email: 'child1@test.com',
+          isActive: true
+        }
+      ];
+
+      User.find.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockResolvedValue(children)
+      });
+
+      await controller.getChildrenByParent(req, res);
+
+      expect(User.find).toHaveBeenCalledWith({ 
+        role: 'child', 
+        parentId: 'parent123' 
+      });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith(children);
+      expect(console.error).not.toHaveBeenCalled();
+    });
+
+    it('should handle errors and log them', async () => {
+      req.params.parentId = 'parent123';
+      const error = new Error('DB error');
+      User.find.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockRejectedValue(error)
+      });
+
+      await controller.getChildrenByParent(req, res);
+
+      expect(console.error).toHaveBeenCalledWith(error);
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({ message: 'Error retrieving children for parent' });
     });
   });
 });

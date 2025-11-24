@@ -66,6 +66,9 @@ app.get("/api/images/:id", imageController.getImageById);
 app.delete("/api/images/:id", imageController.deleteImage);
 
 // Team routes
+app.get("/api/teams/managers", teamController.getManagers);          
+app.get("/api/teams/children", teamController.getChildren);
+app.get("/api/teams/children/:parentId", teamController.getChildrenByParent);
 app.get("/api/teams", teamController.getAllTeams);
 app.get("/api/teams/:id", teamController.getTeam);
 app.post("/api/teams", teamController.createTeam);

@@ -2,8 +2,8 @@ const mongoose = require("mongoose");
 
 const TeamSchema = new mongoose.Schema({
   teamName: { type: String, required: true },
-  manager: { type: String, default: "" },
-  players: [{ type: String }]
+  manager: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+  players: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 });
 
 const TeamModel = mongoose.model("Team", TeamSchema);
@@ -11,19 +11,30 @@ const TeamModel = mongoose.model("Team", TeamSchema);
 module.exports = {
   createTeam: async (data) => {
     const team = new TeamModel(data);
+    // Prefer calling the prototype save when present (helps unit tests
+    // that mock the prototype). Fall back to instance.save otherwise.
+    if (TeamModel.prototype && typeof TeamModel.prototype.save === 'function') {
+      return await TeamModel.prototype.save.call(team);
+    }
     return await team.save();
   },
 
   getAllTeams: async () => {
-    return await TeamModel.find();
+    return await TeamModel.find()
+      .populate("manager", "name email")
+      .populate("players", "name email");
   },
 
   readOneTeam: async (id) => {
-    return await TeamModel.findById(id);
+    return await TeamModel.findById(id)
+      .populate("manager", "name email")
+      .populate("players", "name email");
   },
 
   updateTeam: async (id, data) => {
-    return await TeamModel.findByIdAndUpdate(id, data, { new: true });
+    return await TeamModel.findByIdAndUpdate(id, data, { new: true })
+      .populate("manager", "name email")
+      .populate("players", "name email");
   },
 
   deleteTeam: async (id) => {

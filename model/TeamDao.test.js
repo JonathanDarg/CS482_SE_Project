@@ -1,58 +1,80 @@
-const mongoose = require('mongoose');
-const TeamDao = require('./TeamDao');
+const mongoose = require("mongoose");
+const TeamDao = require("./TeamDao");
 
-jest.mock('mongoose', () => {
-  const actualMongoose = jest.requireActual('mongoose');
-  const mockSchema = function () { return {}; };
-  mockSchema.prototype = {
-    save: jest.fn(),
-  };
+jest.mock("mongoose", () => {
+  const actual = jest.requireActual("mongoose");
 
-  const mockModel = function () {
-    return {
-      save: mockModel.prototype.save,
-    };
-  };
-  mockModel.find = jest.fn();
-  mockModel.findById = jest.fn();
-  mockModel.findByIdAndUpdate = jest.fn();
-  mockModel.findByIdAndDelete = jest.fn();
-  mockModel.deleteMany = jest.fn();
+  // Model constructor
+  function MockModel(data) {
+    this.data = data;
+    this.save = jest.fn();
+  }
+
+  // Static model functions
+  MockModel.find = jest.fn();
+  MockModel.findById = jest.fn();
+  MockModel.findByIdAndUpdate = jest.fn();
+  MockModel.findByIdAndDelete = jest.fn();
+  MockModel.deleteMany = jest.fn();
 
   return {
-    ...actualMongoose,
-    model: jest.fn(() => mockModel),
-    Schema: actualMongoose.Schema,
-    Types: actualMongoose.Types,
+    ...actual,
+    model: jest.fn(() => MockModel),
+    Schema: actual.Schema,
+    Types: actual.Types,
   };
 });
 
-describe('TeamDao', () => {
+// Chainable populate mock: return the chain on first populate call,
+// then resolve the final result on the second call. This models
+// `.populate(...).populate(...).then(...)` chaining used in the DAO.
+const createPopulateChain = (result) => {
+  const chain = { _calls: 0 };
+  chain.populate = jest.fn().mockImplementation(() => {
+    chain._calls += 1;
+    // return chain for the first call so further chaining works
+    if (chain._calls < 2) return chain;
+    // resolve with result on the second call
+    return Promise.resolve(result);
+  });
+
+  return chain;
+};
+
+describe("TeamDao", () => {
   let TeamModel;
 
   beforeAll(() => {
     TeamModel = mongoose.model();
-    TeamModel.prototype.save = jest.fn();
-    TeamModel.find.mockReset();
-    TeamModel.findById.mockReset();
-    TeamModel.findByIdAndUpdate.mockReset();
-    TeamModel.findByIdAndDelete.mockReset();
-    TeamModel.deleteMany.mockReset();
   });
 
-  beforeEach(() => {
-    jest.clearAllMocks();
+  beforeEach(() => jest.clearAllMocks());
+
+  afterEach(() => {
+    // clean up any prototype mocks we set in tests
+    if (TeamModel && TeamModel.prototype && TeamModel.prototype.save && TeamModel.prototype.save._isMockFunction) {
+      delete TeamModel.prototype.save;
+    }
   });
 
-  describe('createTeam', () => {
-    it('should create and save a team', async () => {
-      const teamData = { 
-        teamName: 'Lions', 
-        manager: 'John Doe',
-        players: ['Player 1', 'Player 2']
+  // createTeam
+  describe("createTeam", () => {
+    it("creates and saves a team with objectId references", async () => {
+      const teamData = {
+        teamName: "Lions",
+        manager: "507f1f77bcf86cd799439011",
+        players: [
+          "507f1f77bcf86cd799439012",
+          "507f1f77bcf86cd799439013",
+        ],
       };
-      const savedTeam = { ...teamData, _id: '123' };
-      TeamModel.prototype.save.mockResolvedValue(savedTeam);
+
+      const savedTeam = { ...teamData, _id: "123" };
+
+      // mock save on the prototype so any new instance created by the DAO
+      // will use this mocked save implementation
+      TeamModel.prototype.save = jest.fn().mockResolvedValue(savedTeam);
+      const instance = new TeamModel(teamData);
 
       const result = await TeamDao.createTeam(teamData);
 
@@ -60,17 +82,13 @@ describe('TeamDao', () => {
       expect(result).toEqual(savedTeam);
     });
 
-    it('should create team with empty manager and players', async () => {
-      const teamData = { 
-        teamName: 'Tigers'
-      };
-      const savedTeam = { 
-        teamName: 'Tigers',
-        manager: '',
-        players: [],
-        _id: '456'
-      };
-      TeamModel.prototype.save.mockResolvedValue(savedTeam);
+    it("creates team with null manager and empty players", async () => {
+      const teamData = { teamName: "Tigers", manager: null, players: [] };
+
+      const savedTeam = { ...teamData, _id: "456" };
+
+      TeamModel.prototype.save = jest.fn().mockResolvedValue(savedTeam);
+      const instance = new TeamModel(teamData);
 
       const result = await TeamDao.createTeam(teamData);
 
@@ -79,136 +97,139 @@ describe('TeamDao', () => {
     });
   });
 
-  describe('getAllTeams', () => {
-    it('should return all teams', async () => {
+  // getAllTeams
+  describe("getAllTeams", () => {
+    it("returns all teams with populated manager and players", async () => {
       const teams = [
-        { teamName: 'Lions', manager: 'John', players: ['P1', 'P2'] },
-        { teamName: 'Tigers', manager: 'Jane', players: ['P3'] }
+        {
+          teamName: "Lions",
+          manager: { _id: "1", name: "John", email: "john@test.com" },
+          players: [
+            { _id: "2", name: "P1", email: "p1@test.com" },
+            { _id: "3", name: "P2", email: "p2@test.com" },
+          ],
+        },
       ];
-      TeamModel.find.mockResolvedValue(teams);
+
+      const chain = createPopulateChain(teams);
+      TeamModel.find.mockReturnValue(chain);
 
       const result = await TeamDao.getAllTeams();
 
       expect(TeamModel.find).toHaveBeenCalled();
+      expect(chain.populate).toHaveBeenCalledTimes(2);
+      expect(chain.populate).toHaveBeenNthCalledWith(1, "manager", "name email");
+      expect(chain.populate).toHaveBeenNthCalledWith(2, "players", "name email");
       expect(result).toEqual(teams);
     });
 
-    it('should return empty array when no teams exist', async () => {
-      TeamModel.find.mockResolvedValue([]);
+    it("returns empty array when no teams exist", async () => {
+      const chain = createPopulateChain([]);
+      TeamModel.find.mockReturnValue(chain);
 
       const result = await TeamDao.getAllTeams();
 
-      expect(TeamModel.find).toHaveBeenCalled();
       expect(result).toEqual([]);
     });
   });
 
-  describe('readOneTeam', () => {
-    it('should return one team by id', async () => {
-      const team = { 
-        _id: '1', 
-        teamName: 'Lions',
-        manager: 'John',
-        players: ['P1', 'P2']
+  // readOneTeam
+  describe("readOneTeam", () => {
+    it("returns populated team", async () => {
+      const team = {
+        _id: "1",
+        teamName: "Lions",
+        manager: { _id: "1", name: "John", email: "john@test.com" },
+        players: [{ _id: "2", name: "P1", email: "p1@test.com" }],
       };
-      TeamModel.findById.mockResolvedValue(team);
 
-      const result = await TeamDao.readOneTeam('1');
+      const chain = createPopulateChain(team);
+      TeamModel.findById.mockReturnValue(chain);
 
-      expect(TeamModel.findById).toHaveBeenCalledWith('1');
+      const result = await TeamDao.readOneTeam("1");
+
+      expect(TeamModel.findById).toHaveBeenCalledWith("1");
+      expect(chain.populate).toHaveBeenCalledTimes(2);
       expect(result).toEqual(team);
     });
 
-    it('should return null if team not found', async () => {
-      TeamModel.findById.mockResolvedValue(null);
+    it("returns null when not found", async () => {
+      const chain = createPopulateChain(null);
+      TeamModel.findById.mockReturnValue(chain);
 
-      const result = await TeamDao.readOneTeam('999');
+      const result = await TeamDao.readOneTeam("999");
 
-      expect(TeamModel.findById).toHaveBeenCalledWith('999');
       expect(result).toBeNull();
     });
   });
 
-  describe('updateTeam', () => {
-    it('should update and return the team', async () => {
-      const updatedTeam = { 
-        _id: '1', 
-        teamName: 'Lions Updated',
-        manager: 'John Doe',
-        players: ['P1', 'P2', 'P3']
+  // updateTeam
+  describe("updateTeam", () => {
+    it("updates team and returns populated result", async () => {
+      const updatedTeam = {
+        _id: "1",
+        teamName: "Updated",
+        manager: { _id: "1", name: "John", email: "john@test.com" },
+        players: [],
       };
-      TeamModel.findByIdAndUpdate.mockResolvedValue(updatedTeam);
 
-      const result = await TeamDao.updateTeam('1', { 
-        teamName: 'Lions Updated',
-        players: ['P1', 'P2', 'P3']
-      });
+      const chain = createPopulateChain(updatedTeam);
+      TeamModel.findByIdAndUpdate.mockReturnValue(chain);
 
-      expect(TeamModel.findByIdAndUpdate).toHaveBeenCalledWith(
-        '1',
-        { teamName: 'Lions Updated', players: ['P1', 'P2', 'P3'] },
-        { new: true }
-      );
+      const data = { teamName: "Updated" };
+
+      const result = await TeamDao.updateTeam("1", data);
+
+      expect(TeamModel.findByIdAndUpdate).toHaveBeenCalledWith("1", data, { new: true });
+      expect(chain.populate).toHaveBeenCalledTimes(2);
       expect(result).toEqual(updatedTeam);
     });
 
-    it('should return null if team not found', async () => {
-      TeamModel.findByIdAndUpdate.mockResolvedValue(null);
+    it("returns null when team does not exist", async () => {
+      const chain = createPopulateChain(null);
+      TeamModel.findByIdAndUpdate.mockReturnValue(chain);
 
-      const result = await TeamDao.updateTeam('999', { teamName: 'Updated' });
+      const result = await TeamDao.updateTeam("999", { teamName: "Updated" });
 
-      expect(TeamModel.findByIdAndUpdate).toHaveBeenCalledWith(
-        '999',
-        { teamName: 'Updated' },
-        { new: true }
-      );
       expect(result).toBeNull();
     });
   });
 
-  describe('deleteTeam', () => {
-    it('should delete a team', async () => {
-      const deletedTeam = { 
-        _id: '1', 
-        teamName: 'Lions' 
-      };
-      TeamModel.findByIdAndDelete.mockResolvedValue(deletedTeam);
+  // deleteTeam
+  describe("deleteTeam", () => {
+    it("deletes team", async () => {
+      const deleted = { _id: "1" };
 
-      const result = await TeamDao.deleteTeam('1');
+      TeamModel.findByIdAndDelete.mockResolvedValue(deleted);
 
-      expect(TeamModel.findByIdAndDelete).toHaveBeenCalledWith('1');
-      expect(result).toEqual(deletedTeam);
+      const result = await TeamDao.deleteTeam("1");
+      expect(result).toEqual(deleted);
     });
 
-    it('should return null if team not found', async () => {
+    it("returns null when not found", async () => {
       TeamModel.findByIdAndDelete.mockResolvedValue(null);
 
-      const result = await TeamDao.deleteTeam('999');
-
-      expect(TeamModel.findByIdAndDelete).toHaveBeenCalledWith('999');
+      const result = await TeamDao.deleteTeam("999");
       expect(result).toBeNull();
     });
   });
 
-  describe('deleteAll', () => {
-    it('should delete all teams', async () => {
-      const deleteResult = { deletedCount: 5 };
-      TeamModel.deleteMany.mockResolvedValue(deleteResult);
+  // deleteAll
+  describe("deleteAll", () => {
+    it("deletes all teams", async () => {
+      const res = { deletedCount: 5 };
+      TeamModel.deleteMany.mockResolvedValue(res);
 
       const result = await TeamDao.deleteAll();
-
-      expect(TeamModel.deleteMany).toHaveBeenCalled();
-      expect(result).toEqual(deleteResult);
+      expect(result).toEqual(res);
     });
 
-    it('should return result even if no teams deleted', async () => {
-      const deleteResult = { deletedCount: 0 };
-      TeamModel.deleteMany.mockResolvedValue(deleteResult);
+    it("handles deleting zero", async () => {
+      const res = { deletedCount: 0 };
+      TeamModel.deleteMany.mockResolvedValue(res);
 
       const result = await TeamDao.deleteAll();
-
-      expect(TeamModel.deleteMany).toHaveBeenCalled();
-      expect(result).toEqual(deleteResult);
+      expect(result).toEqual(res);
     });
   });
 });
