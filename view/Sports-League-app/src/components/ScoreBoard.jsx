@@ -170,7 +170,7 @@ export default function LiveScoreboard() {
                     key={game.id}
                     className="shadow-xl border-2 border-orange-600 overflow-hidden"
                   >
-                    <CardHeader className="bg-gradient-to-r from-orange-600 to-orange-700 text-white">
+                    <CardHeader className="bg-linear-to-r from-orange-600 to-orange-700 text-white">
                       <div className="flex items-center justify-between">
                         <CardTitle className="text-lg">
                           {game.field} - Inning {game.currentInning}
@@ -482,7 +482,7 @@ export default function LiveScoreboard() {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {upcomingGames.map((game) => (
                 <Card key={game.id} className="shadow-lg">
-                  <CardHeader className="bg-gradient-to-r from-orange-600 to-orange-700 text-white">
+                  <CardHeader className="bg-linear-to-r from-orange-600 to-orange-700 text-white">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-lg">{game.field}</CardTitle>
                       <Badge variant="secondary" className="bg-white text-orange-700">

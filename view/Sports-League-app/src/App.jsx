@@ -1,5 +1,6 @@
 import "./App.css";
 import React from "react";
+import useHashScroll from "./hooks/useHashScroll";
 import Navbar from "./mainpage/Navbar";
 import Footer from "./mainpage/Footer";
 import { Hero } from "./components/Hero";
@@ -9,18 +10,27 @@ import HomeCalendar from "./pages/HomeCalendar";
 import ImageGallery from "./components/ImageGallery";
 import Score from "./components/Score";
 import Live from "./pages/Live";
-import CountDownTimer from "./components/CountDownTimer";
+import CountDown from "./pages/Countdown";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import About from "./components/About";
+import Seasons from "./pages/Seasons";
+import Community from "./components/Community";
+import Excellence from "./components/Excellence";
+import Sportsmanship from "./components/Sportsmanship";
+import AdminDash from "./pages/AdminDash";
 
 
 function App() {
-
-  const targetDate = "2025-12-31T23:59:59"; // Example target date
+  function HashScrollActivator() {
+    useHashScroll();
+    return null;
+  }
 
   return (
     <Router>
+      <HashScrollActivator />
       <Navbar />
 
       <div className="min-h-[80vh] flex flex-col justify-between">
@@ -30,14 +40,20 @@ function App() {
             element={
               <div className="grow">
                 <Hero />
-                <h2 className="text-center text-4xl font-bold text-orange-500 mb-4">
-                  Youth Sports League
-                </h2>
+                <About />
 
-                {/* Calendar and Gallery */}
-                <div className="flex gap-2 p-4 items-start justify-center">
-                  <HomeCalendar />
-                  <ImageGallery />
+                <HomeCalendar />
+
+                {/* About card Section */}
+                <div id="community">
+                  <Community />
+                   <ImageGallery />
+                </div>
+                <div id="excellence">
+                  <Excellence />
+                </div>
+                <div id="sportsmanship">
+                  <Sportsmanship />
                 </div>
               </div>
             }
@@ -46,12 +62,19 @@ function App() {
           <Route path="/Leaderboard" element={<Leaderboard />} />
           <Route path="/Gallery" element={<ImageGallery />} />
 
-          <Route path="/Countdown" element={<CountDownTimer targetDate={new Date(targetDate).getTime()} />} />
+          <Route path="/Countdown" element={<CountDown />} />
           <Route path="/Score" element={<Score />} />
           <Route path="/Live" element={<Live />} />
 
-                    <Route path="/Login" element={<Login />} />
+          <Route path="/Login" element={<Login />} />
           <Route path="/Signup" element={<Signup />} />
+
+          <Route path="/About" element={<About />} />
+          <Route path="/Seasons" element={<Seasons />} />
+          <Route path="/Community" element={<Community />} />
+          <Route path="/Excellence" element={<Excellence />} />
+          <Route path="/Sportsmanship" element={<Sportsmanship />} />
+          <Route path="/AdminDash" element={<AdminDash />} />
         </Routes>
       </div>
 

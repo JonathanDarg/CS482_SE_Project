@@ -4,21 +4,22 @@ import { FaTimes } from "react-icons/fa";
 function ImageGallery() {
   const [previewURLs, setPreviewURLs] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [fade, setFade] = useState(true);
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [uploadFile, setUploadFile] = useState(null);
   const [isMinor, setIsMinor] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const intervalRef = useRef(null);
   const fetchedOnce = useRef(false);
 
-  // Fetch images once
+  // Fetch images once - optimized version
   const fetchImages = useCallback(async () => {
     if (fetchedOnce.current) return;
     fetchedOnce.current = true;
+    setIsLoading(true);
 
     try {
       const res = await fetch("http://localhost:4000/api/images");
@@ -26,32 +27,44 @@ function ImageGallery() {
 
       const data = await res.json();
 
+      // Clean up old URLs
       previewURLs.forEach((img) => URL.revokeObjectURL(img.url));
 
+      // Fetch images in parallel for faster loading
       const imageBlobs = await Promise.all(
         data.map(async (img) => {
-          const blobRes = await fetch(`http://localhost:4000/api/images/${img._id}`);
-          const blob = await blobRes.blob();
-          return {
-            id: img._id,
-            url: URL.createObjectURL(blob),
-            is_minor: img.is_minor || false,
-          };
+          try {
+            const blobRes = await fetch(`http://localhost:4000/api/images/${img._id}`);
+            if (!blobRes.ok) throw new Error(`Failed to fetch image ${img._id}`);
+            const blob = await blobRes.blob();
+            return {
+              id: img._id,
+              url: URL.createObjectURL(blob),
+              is_minor: img.is_minor || false,
+            };
+          } catch (err) {
+            console.error(`Error fetching image ${img._id}:`, err);
+            return null;
+          }
         })
       );
 
-      setPreviewURLs(imageBlobs);
+      // Filter out failed images
+      const validImages = imageBlobs.filter(img => img !== null);
+      setPreviewURLs(validImages);
     } catch (err) {
       console.error("Error fetching images:", err);
+    } finally {
+      setIsLoading(false); // Set loading false after fetch (success or error)
     }
-  }, []);
+  }, [previewURLs]);
 
   useEffect(() => {
     fetchImages();
     return () => {
       previewURLs.forEach((img) => URL.revokeObjectURL(img.url));
     };
-  }, [fetchImages, previewURLs]);
+  }, [fetchImages]);
 
   // Show all images if signed in or admin; otherwise hide minors
   const visibleImages =
@@ -66,15 +79,11 @@ function ImageGallery() {
 
   // Slideshow rotation
   useEffect(() => {
-    if (visibleImages.length <= 1) return;
+    if (visibleImages.length <= 3) return;
     clearInterval(intervalRef.current);
     intervalRef.current = setInterval(() => {
-      setFade(false);
-      setTimeout(() => {
-        setCurrentIndex((prev) => (prev + 1) % visibleImages.length);
-        setFade(true);
-      }, 500);
-    }, 10000);
+      setCurrentIndex((prev) => (prev + 1) % visibleImages.length);
+    }, 5000);
 
     return () => clearInterval(intervalRef.current);
   }, [visibleImages]);
@@ -137,13 +146,13 @@ function ImageGallery() {
     }
   };
 
-  // Top/bottom image 
-  const topImages = [
+  // Get 4 images in a row for display
+  const displayedImages = [
     visibleImages[currentIndex % visibleImages.length],
     visibleImages[(currentIndex + 1) % visibleImages.length],
-  ];
-  const bottomImage =
-    visibleImages[(currentIndex + 2) % visibleImages.length] || null;
+    visibleImages[(currentIndex + 2) % visibleImages.length],
+    visibleImages[(currentIndex + 3) % visibleImages.length],
+  ].filter(Boolean); 
 
   // Guest / Signed In / Admin toggle
   const ActionButtons = () => {
@@ -151,22 +160,19 @@ function ImageGallery() {
 
     const handleModeToggle = () => {
       if (!isSignedIn && !isAdmin) {
-        // Guest → Signed In
         setIsSignedIn(true);
         setIsAdmin(false);
       } else if (isSignedIn && !isAdmin) {
-        // Signed In → Admin
         setIsSignedIn(false);
         setIsAdmin(true);
       } else {
-        // Admin → Guest
         setIsSignedIn(false);
         setIsAdmin(false);
       }
     };
 
     return (
-      <div className="flex justify-between w-full mt-3 p-2">
+      <div className="flex justify-between w-full mb-6"> 
         <button
           onClick={handleModeToggle}
           className="bg-gray-400 hover:bg-gray-500 text-white text-sm px-3 py-2 rounded-lg transition-colors"
@@ -222,7 +228,7 @@ function ImageGallery() {
           <div className="flex space-x-3">
             <button
               type="submit"
-              disabled={isUploading}
+              disabled={isUploading || !uploadFile} 
               className="bg-green-500 hover:bg-green-600 disabled:bg-green-300 text-white px-4 py-2 rounded-lg transition-colors"
             >
               {isUploading ? "Uploading..." : "Upload"}
@@ -245,76 +251,118 @@ function ImageGallery() {
     </div>
   );
 
-  // Empty gallery state
+  // Loading state
+  if (isLoading) {
+    return (
+      <section className="py-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-5xl mb-3 inline-block relative">
+              Community Photos
+              <div className="absolute -bottom-2 left-0 right-0 h-1 bg-linear-to-r from-orange-500 to-orange-600"></div>
+            </h2>
+            <p className="text-xl text-gray-600 mt-6">
+              Add your own photos!
+            </p>
+          </div>
+          <div className="bg-white shadow-lg rounded-2xl p-8 flex items-center justify-center min-h-[300px]">
+            <div className="text-gray-400 text-xl">Loading images...</div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Empty gallery state (after loading)
   if (visibleImages.length === 0) {
     return (
-      <div className="bg-white shadow-lg rounded-2xl p-4 flex flex-col items-center justify-center max-w-[400px] min-h-[300px]">
-        <div className="text-gray-400 text-center py-8 border border-dashed border-gray-300 rounded-lg w-full">
-          No images available
+      <section className="py-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-5xl mb-3 inline-block relative">
+              Community Photos
+              <div className="absolute -bottom-2 left-0 right-0 h-1 bg-linear-to-r from-orange-500 to-orange-600"></div>
+            </h2>
+            <p className="text-xl text-gray-600 mt-6">
+              Add your own photos!
+            </p>
+          </div>
+
+          <div className="bg-white shadow-lg rounded-2xl p-8 flex flex-col items-center justify-center min-h-[300px]">
+            <div className="text-gray-400 text-center py-8 border border-dashed border-gray-300 rounded-lg w-full">
+              No images available
+            </div>
+            <ActionButtons />
+            {showUploadForm && <UploadModal />}
+          </div>
         </div>
-        <ActionButtons />
-        {showUploadForm && <UploadModal />}
-      </div>
+      </section>
     );
   }
 
   // Main gallery view
   return (
-    <div className="bg-white shadow-lg rounded-2xl p-4 flex flex-col max-w-[400px]">
-      <ActionButtons />
+    <section className="py-20 px-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-16">
+          <h2 className="text-5xl mb-3 inline-block relative">
+            Community Photos
+            <div className="absolute -bottom-2 left-0 right-0 h-1 bg-linear-to-r from-orange-500 to-orange-600"></div> 
+          </h2>
+          <p className="text-xl text-gray-600 mt-6">
+            Add your own photos!
+          </p>
+        </div>
 
-      {/* Top two images */}
-      <div className="grid grid-cols-2 gap-2 mb-2">
-        {topImages.map(
-          (img, index) =>
-            img && (
+        <div className="bg-white shadow-lg rounded-2xl p-8">
+          <ActionButtons />
+
+          {/* Single row of 4 images */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"> 
+            {displayedImages.map((img, index) => (
               <div
                 key={`${img.id}-${index}`}
-                className="relative w-full h-40 overflow-hidden rounded-lg"
+                className="relative w-full h-64 overflow-hidden rounded-lg group" // group class for hover effects
+                style={{
+                  animation: 'fadeIn 0.8s ease-in-out',
+                  animationDelay: `${index * 0.15}s`, // Staggered animation
+                  animationFillMode: 'backwards'
+                }}
               >
                 <img
                   src={img.url}
                   alt={`Gallery ${index}`}
-                  className={`w-full h-full object-cover transition-opacity duration-500 ${
-                    fade ? "opacity-100" : "opacity-0"
-                  }`}
+                  className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-105" // Zoom on hover
                 />
                 {isAdmin && (
                   <button
                     onClick={() => handleRemove(img.id)}
-                    className="absolute top-1 right-1 bg-black/50 hover:bg-red-600 text-white p-1 rounded-full transition-colors"
+                    className="absolute top-2 right-2 bg-black/50 hover:bg-red-600 text-white p-2 rounded-full transition-all opacity-0 group-hover:opacity-100" // Show on hover
                   >
-                    <FaTimes size={12} />
+                    <FaTimes size={16} />
                   </button>
                 )}
               </div>
-            )
-        )}
+            ))}
+          </div>
+
+          {showUploadForm && <UploadModal />}
+        </div>
       </div>
 
-      {/* Bottom image */}
-      {bottomImage && (
-        <div className="relative w-full h-56 overflow-hidden rounded-lg">
-          <img
-            src={bottomImage.url}
-            alt="Gallery bottom"
-            className={`w-full h-full object-cover transition-opacity duration-500 ${
-              fade ? "opacity-100" : "opacity-0"
-            }`}
-          />
-          {isAdmin && (
-            <button
-              onClick={() => handleRemove(bottomImage.id)}
-              className="absolute top-2 right-2 bg-black/50 hover:bg-red-600 text-white p-1 rounded-full transition-colors"
-            >
-              <FaTimes size={14} />
-            </button>
-          )}
-        </div>
-      )}
-
-      {showUploadForm && <UploadModal />}
-    </div>
+      <style jsx>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
+    </section>
   );
 }
 
