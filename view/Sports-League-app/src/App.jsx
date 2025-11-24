@@ -19,7 +19,7 @@ import Seasons from "./pages/Seasons";
 import Community from "./components/Community";
 import Excellence from "./components/Excellence";
 import Sportsmanship from "./components/Sportsmanship";
-import Manager from "./pages/Manager";
+import AdminDash from "./pages/AdminDash";
 
 
 function App() {
@@ -74,7 +74,7 @@ function App() {
           <Route path="/Community" element={<Community />} />
           <Route path="/Excellence" element={<Excellence />} />
           <Route path="/Sportsmanship" element={<Sportsmanship />} />
-          <Route path="/Manager" element={<Manager />} />
+          <Route path="/AdminDash" element={<AdminDash />} />
         </Routes>
       </div>
 
