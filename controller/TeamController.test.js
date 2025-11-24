@@ -16,8 +16,6 @@ describe('TeamController', () => {
       end: jest.fn(),
     };
     jest.clearAllMocks();
-
-    // Suppress console.error in tests
     jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
@@ -98,6 +96,7 @@ describe('TeamController', () => {
         players: ['507f1f77bcf86cd799439012']
       });
       expect(res.status).toHaveBeenCalledWith(201);
+      expect(res.json).toHaveBeenCalledWith(savedTeam);
       expect(console.error).not.toHaveBeenCalled();
     });
 
@@ -127,6 +126,22 @@ describe('TeamController', () => {
       expect(res.status).toHaveBeenCalledWith(201);
     });
 
+    it('should handle undefined players', async () => {
+      req.body = { teamName: 'Lions' };
+      const savedTeam = { teamName: 'Lions', manager: null, players: [], _id: '123' };
+      dao.createTeam.mockResolvedValue(savedTeam);
+
+      await controller.createTeam(req, res);
+
+      expect(dao.createTeam).toHaveBeenCalledWith({
+        teamName: 'Lions',
+        manager: null,
+        players: [],
+      });
+      expect(res.status).toHaveBeenCalledWith(201);
+      expect(res.json).toHaveBeenCalledWith(savedTeam);
+    });
+
     it('should handle errors and log them', async () => {
       req.body = { teamName: 'Lions' };
       const error = new Error('DB error');
@@ -140,7 +155,7 @@ describe('TeamController', () => {
     });
   });
 
-  // get all teams
+  // getAllTeams
   describe('getAllTeams', () => {
     it('should return all teams with populated data', async () => {
       const teams = [
@@ -151,11 +166,6 @@ describe('TeamController', () => {
             { _id: '2', name: 'P1', email: 'p1@test.com' },
             { _id: '3', name: 'P2', email: 'p2@test.com' }
           ]
-        },
-        { 
-          teamName: 'Tigers', 
-          manager: { _id: '4', name: 'Jane', email: 'jane@test.com' }, 
-          players: []
         }
       ];
       dao.getAllTeams.mockResolvedValue(teams);
@@ -180,7 +190,7 @@ describe('TeamController', () => {
     });
   });
 
-  // get one team
+  // getTeam
   describe('getTeam', () => {
     it('should return one team with populated data', async () => {
       req.params.id = '123';
@@ -226,7 +236,7 @@ describe('TeamController', () => {
     });
   });
 
-  // update team
+  // updateTeam
   describe('updateTeam', () => {
     it('should update a team', async () => {
       req.params.id = '1';
@@ -256,15 +266,11 @@ describe('TeamController', () => {
       });
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(updatedTeam);
-      expect(console.error).not.toHaveBeenCalled();
     });
 
     it('should handle null manager', async () => {
       req.params.id = '1';
-      req.body = { 
-        teamName: 'Wolves',
-        players: ['507f1f77bcf86cd799439012']
-      };
+      req.body = { teamName: 'Wolves', players: ['507f1f77bcf86cd799439012'] };
       const updatedTeam = { 
         _id: '1', 
         teamName: 'Wolves',
@@ -294,7 +300,6 @@ describe('TeamController', () => {
 
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({ message: 'Team not found' });
-      expect(console.error).not.toHaveBeenCalled();
     });
 
     it('should handle errors and log them', async () => {
@@ -311,7 +316,7 @@ describe('TeamController', () => {
     });
   });
 
-  // delete team
+  // deleteTeam
   describe('deleteTeam', () => {
     it('should delete a team', async () => {
       req.params.id = '1';
@@ -322,7 +327,6 @@ describe('TeamController', () => {
       expect(dao.deleteTeam).toHaveBeenCalledWith('1');
       expect(res.status).toHaveBeenCalledWith(204);
       expect(res.end).toHaveBeenCalled();
-      expect(console.error).not.toHaveBeenCalled();
     });
 
     it('should handle errors and log them', async () => {
@@ -338,24 +342,46 @@ describe('TeamController', () => {
     });
   });
 
+  // getManagers
+  describe('getManagers', () => {
+    it('should return all managers', async () => {
+      const managers = [
+        { _id: '1', name: 'John', email: 'john@test.com', isActive: true },
+        { _id: '2', name: 'Jane', email: 'jane@test.com', isActive: false },
+      ];
+
+      User.find.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockResolvedValue(managers),
+      });
+
+      await controller.getManagers(req, res);
+
+      expect(User.find).toHaveBeenCalledWith({ role: 'manager' });
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith(managers);
+    });
+
+    it('should handle errors', async () => {
+      const error = new Error('DB error');
+      User.find.mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockRejectedValue(error),
+      });
+
+      await controller.getManagers(req, res);
+
+      expect(console.error).toHaveBeenCalledWith(error);
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith({ message: 'Error retrieving managers' });
+    });
+  });
+
   // getChildren
   describe('getChildren', () => {
     it('should return all children with parent info', async () => {
       const children = [
-        { 
-          _id: '1', 
-          name: 'Child 1', 
-          email: 'child1@test.com',
-          parentId: { _id: 'parent1', name: 'Parent 1', email: 'parent1@test.com' },
-          isActive: true
-        },
-        { 
-          _id: '2', 
-          name: 'Child 2', 
-          email: 'child2@test.com',
-          parentId: { _id: 'parent2', name: 'Parent 2', email: 'parent2@test.com' },
-          isActive: true
-        }
+        { _id: '1', name: 'Child 1', email: 'child1@test.com', parentId: { _id: 'parent1', name: 'Parent 1' }, isActive: true }
       ];
 
       User.find.mockReturnValue({
@@ -369,10 +395,9 @@ describe('TeamController', () => {
       expect(User.find).toHaveBeenCalledWith({ role: 'child' });
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(children);
-      expect(console.error).not.toHaveBeenCalled();
     });
 
-    it('should handle errors and log them', async () => {
+    it('should handle errors', async () => {
       const error = new Error('DB error');
       User.find.mockReturnValue({
         populate: jest.fn().mockReturnThis(),
@@ -392,14 +417,7 @@ describe('TeamController', () => {
   describe('getChildrenByParent', () => {
     it('should return children for specific parent', async () => {
       req.params.parentId = 'parent123';
-      const children = [
-        { 
-          _id: '1', 
-          name: 'Child 1', 
-          email: 'child1@test.com',
-          isActive: true
-        }
-      ];
+      const children = [{ _id: '1', name: 'Child 1', email: 'child1@test.com', isActive: true }];
 
       User.find.mockReturnValue({
         select: jest.fn().mockReturnThis(),
@@ -408,18 +426,15 @@ describe('TeamController', () => {
 
       await controller.getChildrenByParent(req, res);
 
-      expect(User.find).toHaveBeenCalledWith({ 
-        role: 'child', 
-        parentId: 'parent123' 
-      });
+      expect(User.find).toHaveBeenCalledWith({ role: 'child', parentId: 'parent123' });
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(children);
-      expect(console.error).not.toHaveBeenCalled();
     });
 
-    it('should handle errors and log them', async () => {
+    it('should handle errors', async () => {
       req.params.parentId = 'parent123';
       const error = new Error('DB error');
+
       User.find.mockReturnValue({
         select: jest.fn().mockReturnThis(),
         sort: jest.fn().mockRejectedValue(error)

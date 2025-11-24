@@ -11,11 +11,7 @@ const TeamModel = mongoose.model("Team", TeamSchema);
 module.exports = {
   createTeam: async (data) => {
     const team = new TeamModel(data);
-    // Prefer calling the prototype save when present (helps unit tests
-    // that mock the prototype). Fall back to instance.save otherwise.
-    if (TeamModel.prototype && typeof TeamModel.prototype.save === 'function') {
-      return await TeamModel.prototype.save.call(team);
-    }
+    // Always call instance save
     return await team.save();
   },
 

@@ -7,7 +7,8 @@ jest.mock("mongoose", () => {
   // Model constructor
   function MockModel(data) {
     this.data = data;
-    this.save = jest.fn();
+    // Do not assign `save` on the instance so tests can mock
+    // `TeamModel.prototype.save` and have DAO instances use it.
   }
 
   // Static model functions
@@ -25,19 +26,14 @@ jest.mock("mongoose", () => {
   };
 });
 
-// Chainable populate mock: return the chain on first populate call,
-// then resolve the final result on the second call. This models
-// `.populate(...).populate(...).then(...)` chaining used in the DAO.
+// Chainable populate mock
 const createPopulateChain = (result) => {
   const chain = { _calls: 0 };
   chain.populate = jest.fn().mockImplementation(() => {
     chain._calls += 1;
-    // return chain for the first call so further chaining works
     if (chain._calls < 2) return chain;
-    // resolve with result on the second call
     return Promise.resolve(result);
   });
-
   return chain;
 };
 
@@ -51,12 +47,10 @@ describe("TeamDao", () => {
   beforeEach(() => jest.clearAllMocks());
 
   afterEach(() => {
-    // clean up any prototype mocks we set in tests
     if (TeamModel && TeamModel.prototype && TeamModel.prototype.save && TeamModel.prototype.save._isMockFunction) {
       delete TeamModel.prototype.save;
     }
   });
-
   // createTeam
   describe("createTeam", () => {
     it("creates and saves a team with objectId references", async () => {
@@ -74,7 +68,6 @@ describe("TeamDao", () => {
       // mock save on the prototype so any new instance created by the DAO
       // will use this mocked save implementation
       TeamModel.prototype.save = jest.fn().mockResolvedValue(savedTeam);
-      const instance = new TeamModel(teamData);
 
       const result = await TeamDao.createTeam(teamData);
 
@@ -84,11 +77,9 @@ describe("TeamDao", () => {
 
     it("creates team with null manager and empty players", async () => {
       const teamData = { teamName: "Tigers", manager: null, players: [] };
-
       const savedTeam = { ...teamData, _id: "456" };
 
       TeamModel.prototype.save = jest.fn().mockResolvedValue(savedTeam);
-      const instance = new TeamModel(teamData);
 
       const result = await TeamDao.createTeam(teamData);
 
