@@ -1,10 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // If user is already logged in, redirect to home
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      navigate("/");
+    }
+  }, [navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -22,21 +30,11 @@ function Login() {
       if (res.ok) {
         localStorage.setItem("user", JSON.stringify(data.user));
         
-        switch(data.user.role) {
-          case "admin":
-            navigate("/admin/dashboard");
-            break;
-          case "manager":
-            navigate("/manager/dashboard");
-            break;
-          case "parent":
-            navigate("/parent/dashboard");
-            break;
-          case "child":
-            navigate("/child/dashboard");
-            break;
-          default:
-            navigate("/");
+        // Route to AdminDash for admin role, otherwise go to main page
+        if (data.user.role === "admin") {
+          navigate("/AdminDash");
+        } else {
+          navigate("/");
         }
       } else {
         alert(data.message || "Login failed");

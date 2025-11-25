@@ -14,6 +14,7 @@ import CountDown from "./pages/Countdown";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import Profile from "./pages/Profile";
 import About from "./components/About";
 import Seasons from "./pages/Seasons";
 import Community from "./components/Community";
@@ -68,6 +69,7 @@ function App() {
 
           <Route path="/Login" element={<Login />} />
           <Route path="/Signup" element={<Signup />} />
+          <Route path="/Profile" element={<Profile />} />
 
           <Route path="/About" element={<About />} />
           <Route path="/Seasons" element={<Seasons />} />

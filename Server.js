@@ -16,7 +16,12 @@ const teamController = require("./controller/TeamController");
 const User = require("./model/User");
 
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175"],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // ✅ Session middleware 
@@ -40,6 +45,9 @@ app.post("/api/auth/login", authController.login);
 app.post("/api/auth/logout", authController.logout);
 app.get("/api/auth/session", authController.checkSession);
 app.get("/api/auth/children", authController.getChildren);
+app.get("/api/users", authController.getAllUsers);
+app.put("/api/users/role", authController.updateUserRole);
+app.delete("/api/users/:userId", authController.deleteUser);
 
 // Debug route 
 app.get("/debug/users", async (req, res) => {

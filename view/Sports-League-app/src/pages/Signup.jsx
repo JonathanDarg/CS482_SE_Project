@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 function Signup() {
   const [name, setName] = useState("");
@@ -8,6 +8,16 @@ function Signup() {
   const [role, setRole] = useState("parent");
   const [parentEmail, setParentEmail] = useState("");
   const [teamCode, setTeamCode] = useState("");
+  const [agreed, setAgreed] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // If user is already logged in, redirect to home
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      navigate("/");
+    }
+  }, [navigate]);
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -19,6 +29,9 @@ function Signup() {
     }
     if (role === "manager" && teamCode) {
       payload.teamCode = teamCode;
+    }
+    if (role === "parent") {
+      payload.disclaimerAgreed = !!agreed;
     }
 
     try {
@@ -92,6 +105,39 @@ function Signup() {
       padding: '10px',
       borderRadius: '6px',
       borderLeft: '3px solid #ff6b35',
+    },
+    disclaimer: {
+      backgroundColor: '#fff7f2',
+      padding: '14px',
+      borderRadius: '8px',
+      border: '1px solid #ffd6bf',
+      color: '#333',
+      fontSize: '14px',
+      lineHeight: '1.4',
+      marginTop: '8px',
+    },
+    disclaimerList: {
+      listStyleType: 'disc',
+      listStylePosition: 'outside',
+      paddingLeft: '20px',
+      marginTop: '6px',
+      marginBottom: '6px',
+    },
+    disclaimerItem: {
+      marginBottom: '6px',
+    },
+    disclaimerHeading: {
+      fontWeight: 700,
+      marginBottom: '8px',
+      color: '#cc4a00',
+    },
+    checkboxLabel: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      marginTop: '10px',
+      fontSize: '14px',
+      color: '#333',
     },
     roleInfo: {
       fontSize: '13px',
@@ -179,6 +225,34 @@ function Signup() {
               required
             />
             <p style={styles.roleInfo}>Enter the team code provided by the admin</p>
+          </div>
+        )}
+
+        {role === "parent" && (
+          <div style={styles.disclaimer} aria-live="polite">
+            <div style={styles.disclaimerHeading}>Responsibility Disclaimer</div>
+            <div>
+              <p>By registering your child, you agree to the following:</p>
+              <ul style={styles.disclaimerList}>
+                <li style={styles.disclaimerItem}>You’re the parent/guardian and the info you provided is accurate.</li>
+                <li style={styles.disclaimerItem}>Your child has permission to participate in league activities.</li>
+                <li style={styles.disclaimerItem}>Your child will follow basic league rules and respect others.</li>
+                <li style={styles.disclaimerItem}>You understand that sports come with some risk, and the league can’t be responsible for accidental injuries.</li>
+                <li style={styles.disclaimerItem}>If there’s an emergency, league staff may seek medical help if you can’t be reached.</li>
+                <li style={styles.disclaimerItem}>You’re okay with receiving updates about schedules, games, and team info.</li>
+              </ul>
+              <p>By completing registration, you acknowledge and agree to this disclaimer.</p>
+
+              <label style={styles.checkboxLabel}>
+                <input
+                  type="checkbox"
+                  checked={agreed}
+                  onChange={(e) => setAgreed(e.target.checked)}
+                  required
+                />
+                I acknowledge and agree to the Responsibility Disclaimer
+              </label>
+            </div>
           </div>
         )}
 
