@@ -247,6 +247,24 @@ export default function Manager() {
         </h1>
       </header>
 
+      {/* Team Code Info Box */}
+      <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-6 mb-8 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">Default Team Registration Code</h3>
+            <p className="text-sm text-gray-600 mb-3">Share this code with team managers to sign up</p>
+            <div className="bg-white px-6 py-3 rounded-lg border-2 border-blue-400 inline-block">
+              <span className="text-3xl font-bold text-blue-600 tracking-widest">LEAGUE2025</span>
+            </div>
+          </div>
+          <div className="text-blue-600">
+            <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6 font-medium">
           {error}

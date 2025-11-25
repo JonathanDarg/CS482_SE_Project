@@ -21,7 +21,8 @@ import Community from "./components/Community";
 import Excellence from "./components/Excellence";
 import Sportsmanship from "./components/Sportsmanship";
 import AdminDash from "./pages/AdminDash";
-import TeamScoreboard from "./pages/TeamScoreboard";
+import ManagerDashboard from "./pages/ManagerDashboard";
+import TeamInvites from "./pages/TeamInvites";
 
 
 function App() {
@@ -78,7 +79,8 @@ function App() {
           <Route path="/Excellence" element={<Excellence />} />
           <Route path="/Sportsmanship" element={<Sportsmanship />} />
           <Route path="/AdminDash" element={<AdminDash />} />
-          <Route path="/Scoreboard" element={<TeamScoreboard />} />
+          <Route path="/ManagerDashboard" element={<ManagerDashboard />} />
+          <Route path="/TeamInvites" element={<TeamInvites />} />
         </Routes>
       </div>
 

@@ -30,9 +30,11 @@ function Login() {
       if (res.ok) {
         localStorage.setItem("user", JSON.stringify(data.user));
         
-        // Route to AdminDash for admin role, otherwise go to main page
+        // Route based on user role
         if (data.user.role === "admin") {
           navigate("/AdminDash");
+        } else if (data.user.role === "manager") {
+          navigate("/ManagerDashboard");
         } else {
           navigate("/");
         }

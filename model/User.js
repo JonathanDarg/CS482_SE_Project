@@ -27,12 +27,8 @@ const userSchema = new mongoose.Schema({
   // For managers - link to their team
   teamId: { 
     type: mongoose.Schema.Types.ObjectId, 
-    ref: 'Team',
-    required: function() { return this.role === 'manager'; }
+    ref: 'Team'
   },
-  
-  // Optional: for team assignment validation
-  teamCode: { type: String },
   
   // Track account status
   isActive: { type: Boolean, default: true },
