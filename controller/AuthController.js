@@ -1,5 +1,9 @@
 const User = require("../model/User");
 const bcrypt = require("bcryptjs");
+const TeamDao = require("../model/TeamDao");
+
+// Default team code for managers
+const DEFAULT_TEAM_CODE = "LEAGUE2025";
 
 exports.signup = async (req, res) => {
   try {
@@ -36,13 +40,19 @@ exports.signup = async (req, res) => {
       userData.parentId = parent._id;
     }
 
-    // Handle manager account - verify team code
+    // Handle manager account - verify team code and create team
     if (role === 'manager') {
       if (!teamCode) {
         return res.status(400).json({ message: "Team code required for manager accounts" });
       }
       
-      userData.teamCode = teamCode;
+      // Verify the team code is correct
+      if (teamCode !== DEFAULT_TEAM_CODE) {
+        return res.status(400).json({ message: "Invalid team code" });
+      }
+      
+      // Don't store teamCode on user - only use it for validation
+      // Don't set teamId yet - will be set after team creation
     }
 
     // Admin accounts should only be created by existing admins
@@ -55,6 +65,19 @@ exports.signup = async (req, res) => {
     // Create new user
     const newUser = new User(userData);
     await newUser.save();
+
+    // If manager, create their team automatically
+    if (role === 'manager') {
+      const managerTeam = await TeamDao.createTeam({
+        teamName: `${name}'s Team`,
+        manager: newUser._id,
+        players: []
+      });
+      
+      // Update the user's teamId
+      newUser.teamId = managerTeam._id;
+      await newUser.save();
+    }
 
     // If child account, add to parent's children array
     if (role === 'child' && userData.parentId) {
@@ -92,7 +115,7 @@ exports.login = async (req, res) => {
 
     // Store user info in session including role
     req.session.user = {
-      id: user._id,
+      _id: user._id,
       name: user.name,
       email: user.email,
       role: user.role,
@@ -130,11 +153,118 @@ exports.getChildren = async (req, res) => {
       return res.status(403).json({ message: "Access denied" });
     }
 
-    const parent = await User.findById(req.session.user.id)
+    const parent = await User.findById(req.session.user._id)
       .populate('children', 'name email createdAt');
     
     res.json({ children: parent.children });
   } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Get all users (admin only)
+exports.getAllUsers = async (req, res) => {
+  try {
+    console.log("Session user:", req.session.user); // Debug log
+    
+    if (!req.session.user || req.session.user.role !== 'admin') {
+      return res.status(403).json({ message: "Access denied. Admin only." });
+    }
+
+    const users = await User.find({})
+      .select('-password')
+      .sort({ createdAt: -1 });
+    
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Update user role (admin only)
+exports.updateUserRole = async (req, res) => {
+  try {
+    if (!req.session.user || req.session.user.role !== 'admin') {
+      return res.status(403).json({ message: "Access denied. Admin only." });
+    }
+
+    const { userId, newRole } = req.body;
+
+    if (!userId || !newRole) {
+      return res.status(400).json({ message: "User ID and new role are required" });
+    }
+
+    // Validate role
+    const validRoles = ['parent', 'manager', 'child', 'admin'];
+    if (!validRoles.includes(newRole)) {
+      return res.status(400).json({ message: "Invalid role" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Prevent demoting yourself if you're the admin
+    if (user._id.toString() === req.session.user._id && newRole !== 'admin') {
+      return res.status(400).json({ message: "Cannot demote yourself" });
+    }
+
+    // Update the role
+    user.role = newRole;
+    
+    // Clear teamId if changing from manager to another role
+    if (user.role !== 'manager' && user.teamId) {
+      user.teamId = null;
+    }
+
+    await user.save();
+
+    res.json({ 
+      message: "User role updated successfully",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
+    });
+  } catch (err) {
+    console.error("Update role error:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Delete user (admin only)
+exports.deleteUser = async (req, res) => {
+  try {
+    if (!req.session.user || req.session.user.role !== 'admin') {
+      return res.status(403).json({ message: "Access denied. Admin only." });
+    }
+
+    const { userId } = req.params;
+
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Prevent deleting yourself
+    if (user._id.toString() === req.session.user._id) {
+      return res.status(400).json({ message: "Cannot delete yourself" });
+    }
+
+    await User.findByIdAndDelete(userId);
+
+    res.json({ 
+      message: "User deleted successfully"
+    });
+  } catch (err) {
+    console.error("Delete user error:", err);
     res.status(500).json({ error: err.message });
   }
 };

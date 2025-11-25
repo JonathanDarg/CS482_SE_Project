@@ -14,12 +14,15 @@ import CountDown from "./pages/Countdown";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import Profile from "./pages/Profile";
 import About from "./components/About";
 import Seasons from "./pages/Seasons";
 import Community from "./components/Community";
 import Excellence from "./components/Excellence";
 import Sportsmanship from "./components/Sportsmanship";
 import AdminDash from "./pages/AdminDash";
+import ManagerDashboard from "./pages/ManagerDashboard";
+import TeamInvites from "./pages/TeamInvites";
 
 
 function App() {
@@ -68,6 +71,7 @@ function App() {
 
           <Route path="/Login" element={<Login />} />
           <Route path="/Signup" element={<Signup />} />
+          <Route path="/Profile" element={<Profile />} />
 
           <Route path="/About" element={<About />} />
           <Route path="/Seasons" element={<Seasons />} />
@@ -75,6 +79,8 @@ function App() {
           <Route path="/Excellence" element={<Excellence />} />
           <Route path="/Sportsmanship" element={<Sportsmanship />} />
           <Route path="/AdminDash" element={<AdminDash />} />
+          <Route path="/ManagerDashboard" element={<ManagerDashboard />} />
+          <Route path="/TeamInvites" element={<TeamInvites />} />
         </Routes>
       </div>
 

@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Trophy } from "lucide-react";
 
 export default function Manager() {
   const [teams, setTeams] = useState([]);
   const [managers, setManagers] = useState([]);
   const [children, setChildren] = useState([]);
+  const [users, setUsers] = useState([]);
   const [form, setForm] = useState({
     teamName: "",
     manager: "",
@@ -14,6 +16,22 @@ export default function Manager() {
   const [error, setError] = useState("");
   const [editMode, setEditMode] = useState(false);
   const [editingTeamId, setEditingTeamId] = useState(null);
+  const navigate = useNavigate();
+
+  // Check if user is admin
+  useEffect(() => {
+    const userData = localStorage.getItem("user");
+    if (!userData) {
+      navigate("/Login");
+      return;
+    }
+    
+    const user = JSON.parse(userData);
+    if (user.role !== "admin") {
+      alert("Access denied. Admin only.");
+      navigate("/");
+    }
+  }, [navigate]);
 
   const fetchTeams = async () => {
     try {
@@ -51,10 +69,30 @@ export default function Manager() {
     }
   };
 
+  const fetchUsers = async () => {
+    try {
+      const res = await fetch("http://localhost:4000/api/users", {
+        credentials: "include"
+      });
+      
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to load users");
+      }
+      
+      const data = await res.json();
+      setUsers(data);
+    } catch (err) {
+      console.error("Error loading users:", err);
+      setError(`Failed to load users: ${err.message}`);
+    }
+  };
+
   useEffect(() => {
     fetchTeams();
     fetchManagers();
     fetchChildren();
+    fetchUsers();
   }, []);
 
   const handleChange = (e) => {
@@ -75,6 +113,11 @@ export default function Manager() {
 
     if (!form.teamName.trim()) {
       setError("Team name is required");
+      return;
+    }
+
+    if (!form.manager) {
+      setError("Manager is required");
       return;
     }
 
@@ -147,14 +190,80 @@ export default function Manager() {
     }
   };
 
+  const handleRoleChange = async (userId, newRole) => {
+    if (!window.confirm(`Are you sure you want to change this user's role to ${newRole}?`)) return;
+
+    try {
+      const res = await fetch("http://localhost:4000/api/users/role", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ userId, newRole })
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.message || "Failed to update role");
+      }
+
+      await fetchUsers();
+      await fetchManagers(); // Refresh managers list if role changed to/from manager
+      setError("");
+    } catch (err) {
+      console.error("Error updating role:", err);
+      setError(err.message);
+    }
+  };
+
+  const handleDeleteUser = async (userId, userName) => {
+    if (!window.confirm(`Are you sure you want to delete user "${userName}"? This action cannot be undone.`)) return;
+
+    try {
+      const res = await fetch(`http://localhost:4000/api/users/${userId}`, {
+        method: "DELETE",
+        credentials: "include"
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.message || "Failed to delete user");
+      }
+
+      await fetchUsers();
+      await fetchManagers(); // Refresh managers list if a manager was deleted
+      setError("");
+    } catch (err) {
+      console.error("Error deleting user:", err);
+      setError(err.message);
+    }
+  };
+
   return (
     <div className="max-w-6xl mx-auto p-4 md:p-8 lg:p-10 min-h-screen bg-gray-50">
 
-      <header className="text-center py-6 bg-orange-500 text-white shadow-md rounded-lg mb-10">
-        <h1 className="text-4xl font-extrabold tracking-tight">
-          ⚾ Little League Admin Dashboard
+      <header className="text-center py-6 bg-gradient-to-r from-slate-700 to-slate-900 text-white shadow-md rounded-lg mb-10">
+        <h1 className="text-4xl font-bold tracking-tight">
+          Admin Dashboard
         </h1>
       </header>
+
+      {/* Team Code Info Box */}
+      <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-6 mb-8 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">Default Team Registration Code</h3>
+            <p className="text-sm text-gray-600 mb-3">Share this code with team managers to sign up</p>
+            <div className="bg-white px-6 py-3 rounded-lg border-2 border-blue-400 inline-block">
+              <span className="text-3xl font-bold text-blue-600 tracking-widest">LEAGUE2025</span>
+            </div>
+          </div>
+          <div className="text-blue-600">
+            <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+            </svg>
+          </div>
+        </div>
+      </div>
 
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6 font-medium">
@@ -183,10 +292,11 @@ export default function Manager() {
               name="manager"
               value={form.manager}
               onChange={handleChange}
+              required
               className="w-full mb-6 p-3 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-orange-500"
             >
               <option value="" className="text-gray-500">
-                Select Manager (Optional)
+                Select Manager *
               </option>
               {managers.map((manager) => (
                 <option key={manager._id} value={manager._id}>
@@ -332,6 +442,93 @@ export default function Manager() {
               </div>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* User Management Section */}
+      <div className="mt-16">
+        <h2 className="text-3xl font-bold mb-6 text-black border-b-2 border-orange-500 pb-2 flex items-center justify-center gap-2">
+          👥 User Management
+        </h2>
+
+        {users.length === 0 && (
+          <p className="text-lg text-gray-500 text-center py-10">
+            No users found.
+          </p>
+        )}
+
+        <div className="bg-white shadow-xl rounded-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-orange-500 text-white">
+                <tr>
+                  <th className="px-6 py-3 text-left text-sm font-semibold">Name</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold">Email</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold">Current Role</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold">Change Role</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {users.map((user) => (
+                  <tr key={user._id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 text-sm text-gray-900">{user.name}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{user.email}</td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
+                        user.role === 'admin' ? 'bg-red-100 text-red-800' :
+                        user.role === 'manager' ? 'bg-blue-100 text-blue-800' :
+                        user.role === 'parent' ? 'bg-green-100 text-green-800' :
+                        'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex gap-2">
+                        {user.role !== 'parent' && (
+                          <button
+                            onClick={() => handleRoleChange(user._id, 'parent')}
+                            className="px-3 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600 transition"
+                            title="Change to Parent"
+                          >
+                            → Parent
+                          </button>
+                        )}
+                        {user.role !== 'manager' && (
+                          <button
+                            onClick={() => handleRoleChange(user._id, 'manager')}
+                            className="px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                            title="Change to Manager"
+                          >
+                            → Manager
+                          </button>
+                        )}
+                        {user.role !== 'admin' && (
+                          <button
+                            onClick={() => handleRoleChange(user._id, 'admin')}
+                            className="px-3 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 transition"
+                            title="Change to Admin"
+                          >
+                            → Admin
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <button
+                        onClick={() => handleDeleteUser(user._id, user.name)}
+                        className="px-4 py-2 text-xs bg-red-600 text-white rounded hover:bg-red-700 transition font-semibold"
+                        title="Delete User"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
