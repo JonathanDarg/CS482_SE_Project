@@ -47,6 +47,20 @@ const Navbar = () => {
             </Link>
           </li>
         )}
+        {userRole === 'manager' && (
+          <li className="my-4 py-4 border-b border-slate-800 hover:bg-orange-600 hover:rounded cursor-pointer">
+            <Link to="/ManagerDashboard" onClick={handleClick} className="flex items-center justify-center gap-2">
+              👥 Manager Dashboard
+            </Link>
+          </li>
+        )}
+        {(userRole === 'child' || userRole === 'parent') && (
+          <li className="my-4 py-4 border-b border-slate-800 hover:bg-orange-600 hover:rounded cursor-pointer">
+            <Link to="/TeamInvites" onClick={handleClick} className="flex items-center justify-center gap-2">
+              📩 Team Invites
+            </Link>
+          </li>
+        )}
         <li className="my-4 py-4 border-b border-slate-800 hover:bg-orange-600 hover:rounded cursor-pointer">
           <Link to="/Calendar" onClick={handleClick} className="flex items-center justify-center gap-2">
             <FaCalendarAlt /> Calendar

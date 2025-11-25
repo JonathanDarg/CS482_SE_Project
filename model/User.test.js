@@ -34,11 +34,11 @@ describe('User model schema validation', () => {
     expect(u.parentId.toString()).toBe(fakeId.toString());
   });
 
-  it('requires teamId for manager role', () => {
+  it('allows manager creation without teamId (team is auto-created on signup)', () => {
     const u = new User({ name: 'Manager', email: 'm@test.com', password: 'secret', role: 'manager' });
     const err = u.validateSync();
-    expect(err).toBeDefined();
-    expect(err.errors.teamId).toBeDefined();
+    expect(err).toBeUndefined();
+    expect(u.teamId).toBeUndefined();
   });
 
   it('accepts teamId when role is manager', () => {

@@ -21,6 +21,12 @@ exports.createTeam = async (req, res) => {
     };
 
     const saved = await dao.createTeam(team);
+    
+    // Update manager's teamId if a manager is assigned
+    if (team.manager) {
+      await User.findByIdAndUpdate(team.manager, { teamId: saved._id });
+    }
+    
     res.status(201).json(saved);
 
   } catch (err) {
@@ -63,6 +69,12 @@ exports.updateTeam = async (req, res) => {
 
     const updated = await dao.updateTeam(req.params.id, update);
     if (!updated) return res.status(404).json({ message: "Team not found" });
+    
+    // Update manager's teamId if a manager is assigned
+    if (update.manager) {
+      await User.findByIdAndUpdate(update.manager, { teamId: req.params.id });
+    }
+    
     res.status(200).json(updated);
 
   } catch (err) {

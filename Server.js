@@ -11,6 +11,7 @@ const authController = require("./controller/AuthController");
 const eventController = require("./controller/EventController");
 const imageController = require("./controller/ImageController");
 const teamController = require("./controller/TeamController");
+const teamInviteController = require("./controller/TeamInviteController");
 
 // Models
 const User = require("./model/User");
@@ -82,6 +83,12 @@ app.get("/api/teams/:id", teamController.getTeam);
 app.post("/api/teams", teamController.createTeam);
 app.put("/api/teams/:id", teamController.updateTeam);
 app.delete("/api/teams/:id", teamController.deleteTeam);
+
+// Team Invite routes
+app.post("/api/invites/send", teamInviteController.sendInvite);
+app.get("/api/invites/player", teamInviteController.getPlayerInvites);
+app.get("/api/invites/team/:teamId", teamInviteController.getTeamInvites);
+app.put("/api/invites/:inviteId/respond", teamInviteController.respondToInvite);
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
