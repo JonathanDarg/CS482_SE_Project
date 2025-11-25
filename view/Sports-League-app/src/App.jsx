@@ -23,6 +23,7 @@ import Sportsmanship from "./components/Sportsmanship";
 import AdminDash from "./pages/AdminDash";
 import ManagerDashboard from "./pages/ManagerDashboard";
 import TeamInvites from "./pages/TeamInvites";
+import TeamScoreboard from "./pages/TeamScoreboard";
 
 
 function App() {
@@ -81,6 +82,7 @@ function App() {
           <Route path="/AdminDash" element={<AdminDash />} />
           <Route path="/ManagerDashboard" element={<ManagerDashboard />} />
           <Route path="/TeamInvites" element={<TeamInvites />} />
+          <Route path="/Scoreboard" element={<TeamScoreboard />} />
         </Routes>
       </div>
 
