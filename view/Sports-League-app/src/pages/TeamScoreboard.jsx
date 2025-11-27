@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Trophy, Medal, Award, Crown } from 'lucide-react';
-import ScoreBoardT from "../components/ScoreBoardT";
+//import ScoreBoardT from "../components/ScoreBoardT";
 
 function TeamScoreboard() {
   const [teams, setTeams] = useState([]);
