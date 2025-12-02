@@ -42,6 +42,7 @@ const Navbar = () => {
     setProfileOpen(false);
     navigate("/");
     setClick(false);
+    window.location.reload();
   };
 
   const NavLink = ({ to, icon, text }) => (
