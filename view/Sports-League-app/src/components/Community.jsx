@@ -1,5 +1,3 @@
-"use client";
-
 import React from "react";
 import { Card, CardContent } from "../ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "../ui/carousel";
@@ -56,13 +54,33 @@ export function Community() {
     },
   ];
 
+  const communityStats = [
+    {
+      number: "500+",
+      label: "Community Members",
+      description: "Players, families, and fans.",
+    },
+    {
+      number: "50+",
+      label: "Volunteer Coaches",
+      description: "Dedicated leaders and mentors.",
+    },
+    {
+      number: "20+",
+      label: "Years of Tradition",
+      description: "Building character since inception.",
+    },
+  ];
+
   return (
     <section className="py-2 bg-white text-gray-900">
       <div className="max-w-full">
-
         {/* Header */}
         <div className="text-center mb-8 px-4">
-          <h2 id="community-title" className="text-5xl mb-3 inline-block relative">
+          <h2
+            id="community-title"
+            className="text-5xl mb-3 inline-block relative"
+          >
             Our Community
             <span className="absolute -bottom-2 left-0 right-0 h-1 bg-linear-to-r from-orange-500 to-orange-400"></span>
           </h2>
@@ -76,7 +94,10 @@ export function Community() {
           <Carousel opts={{ align: "start", loop: true }} className="w-full">
             <CarouselContent className="-ml-4">
               {communityPhotos.map((photo) => (
-                <CarouselItem key={photo.id} className="pl-4 md:basis-1/2 lg:basis-1/3">
+                <CarouselItem
+                  key={photo.id}
+                  className="pl-4 md:basis-1/2 lg:basis-1/3"
+                >
                   <Card className="overflow-hidden border-2 border-gray-200 hover:border-orange-500 transition-all hover:shadow-2xl group">
                     <CardContent className="p-0">
                       <div className="relative overflow-hidden">
@@ -89,7 +110,9 @@ export function Community() {
                         <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                           <div className="absolute bottom-0 left-0 right-0 p-6 text-white transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
                             <h3 className="text-2xl mb-2">{photo.title}</h3>
-                            <p className="text-sm opacity-90">{photo.description}</p>
+                            <p className="text-sm opacity-90">
+                              {photo.description}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -104,22 +127,25 @@ export function Community() {
           </Carousel>
         </div>
 
-        {/* Stats */}
-        <div className="grid md:grid-cols-3 gap-8 mt-8 px-4 max-w-6xl mx-auto">
-          <div className="text-center">
-            <div className="text-5xl text-orange-500 mb-2">500+</div>
-            <p className="text-xl text-gray-600">Community Members</p>
-          </div>
-          <div className="text-center">
-            <div className="text-5xl text-orange-500 mb-2">50+</div>
-            <p className="text-xl text-gray-600">Volunteer Coaches</p>
-          </div>
-          <div className="text-center">
-            <div className="text-5xl text-orange-500 mb-2">20+</div>
-            <p className="text-xl text-gray-600">Years of Tradition</p>
-          </div>
+        {/* Stat cards */}
+        <div className="grid md:grid-cols-3 gap-6 mt-12 px-4 max-w-6xl mx-auto">
+          {communityStats.map((stat, index) => (
+            <Card
+              key={index}
+              className="border-2 border-gray-200 hover:border-orange-500 shadow-lg hover:shadow-2xl transition-all duration-300"
+            >
+              <CardContent className="p-6 flex flex-col items-center justify-center text-center">
+                <div className="text-6xl text-orange-500 mb-2">
+                  {stat.number}
+                </div>
+                <p className="text-2xl font-semibold text-gray-800 mb-1">
+                  {stat.label}
+                </p>
+                <p className="text-sm text-gray-500">{stat.description}</p>
+              </CardContent>
+            </Card>
+          ))}
         </div>
-
       </div>
     </section>
   );
