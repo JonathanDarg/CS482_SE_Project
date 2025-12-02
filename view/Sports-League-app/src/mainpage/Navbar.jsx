@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import useAuth from '../hooks/useAuth';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   FaTimes, FaHome, FaCalendarAlt, FaTrophy, FaEnvelope,
@@ -11,25 +12,20 @@ const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState(null);
   const [userName, setUserName] = useState(null);
+  const auth = useAuth();
   const [profileOpen, setProfileOpen] = useState(false);
   
   const navigate = useNavigate();
   const location = useLocation(); 
 
   useEffect(() => {
-    // Check if user is logged in
-    const userData = localStorage.getItem("user");
-    if (userData) {
-      const user = JSON.parse(userData);
-      setIsLoggedIn(true);
-      setUserRole(user.role);
-      setUserName(user.name);
-    } else {
-      setIsLoggedIn(false);
-      setUserRole(null);
-      setUserName(null);
+    // populate from auth hook when available
+    if (auth) {
+      setIsLoggedIn(Boolean(auth.isLoggedIn));
+      setUserRole(auth.user?.role || null);
+      setUserName(auth.user?.name || (auth.user ? auth.user.name : null));
     }
-  }, []);
+  }, [auth]);
 
   const handleClick = () => {
     setClick(!click);
