@@ -12,6 +12,7 @@ const eventController = require("./controller/EventController");
 const imageController = require("./controller/ImageController");
 const teamController = require("./controller/TeamController");
 const teamInviteController = require("./controller/TeamInviteController");
+const teamStatsController = require("./controller/TeamStatsController");
 
 // Models
 const User = require("./model/User");
@@ -89,6 +90,9 @@ app.post("/api/invites/send", teamInviteController.sendInvite);
 app.get("/api/invites/player", teamInviteController.getPlayerInvites);
 app.get("/api/invites/team/:teamId", teamInviteController.getTeamInvites);
 app.put("/api/invites/:inviteId/respond", teamInviteController.respondToInvite);
+
+// Team Stats routes
+app.get("/api/stats", teamStatsController.getAllStats);
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
