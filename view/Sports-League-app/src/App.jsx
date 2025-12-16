@@ -6,6 +6,7 @@ import Footer from "./mainpage/Footer";
 import { Hero } from "./components/Hero";
 import Calendar from "./pages/Calendar";
 import Leaderboard from "./pages/Leaderboard";
+import Leaderboard1 from "./pages/Leaderboard1";
 import HomeCalendar from "./pages/HomeCalendar";
 import ImageGallery from "./components/ImageGallery";
 import Score from "./components/Score";
@@ -24,6 +25,7 @@ import AdminDash from "./pages/AdminDash";
 import ManagerDashboard from "./pages/ManagerDashboard";
 import TeamInvites from "./pages/TeamInvites";
 import TeamScoreboard from "./pages/TeamScoreboard";
+import TeamScoreboardv2 from "./pages/TeamScoreboardv2";
 
 
 function App() {
@@ -82,7 +84,9 @@ function App() {
           <Route path="/AdminDash" element={<AdminDash />} />
           <Route path="/ManagerDashboard" element={<ManagerDashboard />} />
           <Route path="/TeamInvites" element={<TeamInvites />} />
-          <Route path="/Scoreboard" element={<TeamScoreboard />} />
+          <Route path="/TeamScoreboard" element={<TeamScoreboard />} />
+          <Route path="/TeamScoreboardv2" element={<TeamScoreboardv2 />} />
+          <Route path="/Leaderboard1" element={<Leaderboard1 />} />
         </Routes>
       </div>
 

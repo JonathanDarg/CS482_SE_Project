@@ -205,6 +205,18 @@ const Navbar = () => {
                         <FaUser className="text-orange-600 text-lg" /> View Profile
                       </Link>
 
+                      {/* Team Invites */}
+                      {(userRole === 'child' || userRole === 'parent') && (
+                        <Link
+                          to="/TeamInvites"
+                          onClick={() => setProfileOpen(false)}
+                          className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-gray-100 transition"
+                        >
+                          <span className="text-lg">📩</span>
+                          Team Invites
+                        </Link>
+                      )}
+
                       {/* 3. Logout */}
                       <div className="border-t border-gray-100 my-1"></div>
                       <button onClick={handleLogout} className="flex items-center gap-3 w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors">
