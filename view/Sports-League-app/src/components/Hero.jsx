@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "../ui/button";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 export function Hero() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     // Check if user is logged in
@@ -32,7 +33,23 @@ export function Hero() {
               <Button className="bg-orange-500 hover:bg-accent px-8 py-6">Register Now</Button>
             </Link>
           )}
-          <Button variant="outline" className="bg-white text-black hover:bg-gray-100 px-8 py-6">Learn More</Button>
+          <Link
+            to="/#about"
+            onClick={(e) => {
+              if (location.pathname === "/" || location.pathname === "") {
+                // smooth-scroll to the about section without navigating
+                e.preventDefault();
+                const el = document.getElementById("about");
+                if (!el) return;
+                const nav = document.querySelector("nav");
+                const navHeight = nav ? nav.offsetHeight : 0;
+                const top = el.getBoundingClientRect().top + window.scrollY - navHeight - 8;
+                window.scrollTo({ top, behavior: "smooth" });
+              }
+            }}
+          >
+            <Button variant="outline" className="bg-white text-black hover:bg-gray-100 px-8 py-6">Learn More</Button>
+          </Link>
         </div>
       </div>
     </section>

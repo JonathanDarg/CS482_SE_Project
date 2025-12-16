@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { FaUser, FaLock, FaSignInAlt } from "react-icons/fa"; // Imported Icons
+import { MdOutlineEmail } from "react-icons/md"; // Email Icon
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false); // New state for loading indicator
+  const [error, setError] = useState(null); // New state for error messages
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -16,6 +20,8 @@ function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError(null);
 
     try {
       const res = await fetch("http://localhost:4000/api/auth/login", {
@@ -38,102 +44,93 @@ function Login() {
         } else {
           navigate("/");
         }
+        window.location.reload();
       } else {
-        alert(data.message || "Login failed");
+        setError(data.message || "Login failed. Please check your credentials.");
       }
     } catch (err) {
-      alert("Error connecting to server");
+      setError("Error connecting to server. Please try again later.");
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const styles = {
-    container: {
-      maxWidth: '450px',
-      margin: '50px auto',
-      padding: '40px',
-      background: '#fff',
-      borderRadius: '10px',
-      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
-    },
-    heading: {
-      textAlign: 'center',
-      color: '#333',
-      marginBottom: '30px',
-      fontSize: '28px',
-    },
-    form: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '18px',
-    },
-    input: {
-      padding: '14px',
-      border: '2px solid #e0e0e0',
-      borderRadius: '6px',
-      fontSize: '16px',
-      transition: 'border-color 0.3s',
-    },
-    button: {
-      padding: '14px',
-      backgroundColor: '#ff6b35',
-      color: 'white',
-      border: 'none',
-      borderRadius: '6px',
-      fontSize: '18px',
-      fontWeight: '600',
-      cursor: 'pointer',
-      transition: 'background-color 0.3s',
-      marginTop: '10px',
-    },
-    link: {
-      textAlign: 'center',
-      marginTop: '20px',
-      color: '#666',
-      fontSize: '14px',
-    },
-    linkAnchor: {
-      color: '#ff6b35',
-      textDecoration: 'none',
-      fontWeight: '600',
-    },
-  };
-
   return (
-    <div style={styles.container}>
-      <form onSubmit={handleLogin} style={styles.form}>
-        <h2 style={styles.heading}>Login</h2>
+    // FULL PAGE CONTAINER with Dark Background
+    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+      {/* LOGIN CARD */}
+      <div className="w-full max-w-md bg-white/95 backdrop-blur-sm rounded-xl shadow-2xl p-8 md:p-10 border border-gray-100/50">
         
-        <input
-          style={styles.input}
-          placeholder="Email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+        <div className="text-center mb-8">
+          <FaSignInAlt className="text-4xl text-orange-600 mx-auto mb-3" />
+          <h2 className="text-3xl font-extrabold text-gray-800">Welcome Back!</h2>
+          <p className="text-gray-500 mt-1">Sign in to access your league dashboard.</p>
+        </div>
+
+        {/* ERROR MESSAGE */}
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+            <span className="block sm:inline">{error}</span>
+          </div>
+        )}
+
+        <form onSubmit={handleLogin} className="space-y-6">
+          
+          {/* EMAIL INPUT */}
+          <div className="relative">
+            <MdOutlineEmail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <input
+              className="w-full py-3 pl-12 pr-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition duration-200"
+              placeholder="Email Address"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              disabled={loading}
+            />
+          </div>
+          
+          {/* PASSWORD INPUT */}
+          <div className="relative">
+            <FaLock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <input
+              className="w-full py-3 pl-12 pr-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition duration-200"
+              placeholder="Password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              disabled={loading}
+            />
+          </div>
+
+          {/* LOGIN BUTTON */}
+          <button
+            type="submit"
+            className="w-full py-3 bg-orange-600 text-white rounded-lg text-lg font-bold shadow-md hover:bg-orange-700 transition duration-200 focus:outline-none focus:ring-4 focus:ring-orange-500/50 flex items-center justify-center"
+            disabled={loading}
+          >
+            {loading ? (
+              <svg className="animate-spin h-5 w-5 text-white mr-3" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            ) : (
+              <>
+                <FaUser className="mr-2" /> Login
+              </>
+            )}
+          </button>
+        </form>
         
-        <input
-          style={styles.input}
-          placeholder="Password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        
-        <button 
-          type="submit" 
-          style={styles.button}
-          onMouseEnter={(e) => e.target.style.backgroundColor = '#e55a2b'}
-          onMouseLeave={(e) => e.target.style.backgroundColor = '#ff6b35'}
-        >
-          Login
-        </button>
-      </form>
-      
-      <div style={styles.link}>
-        Don't have an account? <Link to="/Signup" style={styles.linkAnchor}>Sign Up</Link>
+        {/* FOOTER LINK */}
+        <div className="text-center mt-6 text-sm text-gray-600">
+          Don't have an account? 
+          <Link to="/Signup" className="text-orange-600 font-semibold hover:text-orange-700 ml-1 transition duration-200">
+            Sign Up
+          </Link>
+        </div>
       </div>
     </div>
   );
